@@ -1,6 +1,6 @@
 /*************************************************************************************************
  *                                                                                                *
- *  file: main.cpp                                                                                *
+ *  file: manager_tests.h                                                                         *
  *                                                                                                *
  *  SpendingControl Tests                                                                         *
  *  Copyright (C) 2017 Eugene Melnik <jeka7js@gmail.com>                                          *
@@ -18,23 +18,21 @@
  *                                                                                                *
   *************************************************************************************************/
 
-#include <QtTest>
+#ifndef DATABASE_MANAGER_TESTS
+#define DATABASE_MANAGER_TESTS
 
-#include "database/manager_tests.h"
+#include <QObject>
 
-
-int main( int argc, char** argv )
+class DatabaseManagerTests : public QObject
 {
-    QObject* tests[] = {
-        new DatabaseManagerTests()
-    };
+    Q_OBJECT
 
-    int result = 0;
+    private slots:
+        void init();
+        void cleanup();
 
-    for( QObject* test : tests )
-    {
-        result |= QTest::qExec( test, argc, argv );
-    }
+        void createInstanceWrongDriver();
+        void createInstanceNonExistantFile();
+};
 
-    return( result );
-}
+#endif // DATABASE_MANAGER_TESTS

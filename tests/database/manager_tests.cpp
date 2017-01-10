@@ -1,6 +1,6 @@
 /*************************************************************************************************
  *                                                                                                *
- *  file: main.cpp                                                                                *
+ *  file: manager_tests.cpp                                                                       *
  *                                                                                                *
  *  SpendingControl Tests                                                                         *
  *  Copyright (C) 2017 Eugene Melnik <jeka7js@gmail.com>                                          *
@@ -18,23 +18,52 @@
  *                                                                                                *
   *************************************************************************************************/
 
+#include "manager_tests.h"
+#include "database/manager.h"
+#include "types.h"
+
+#include <QDebug>
 #include <QtTest>
 
-#include "database/manager_tests.h"
 
-
-int main( int argc, char** argv )
+void DatabaseManagerTests::init()
 {
-    QObject* tests[] = {
-        new DatabaseManagerTests()
+    DatabaseManager::clearInstance();
+}
+
+
+void DatabaseManagerTests::cleanup()
+{
+    DatabaseManager::clearInstance();
+}
+
+
+void DatabaseManagerTests::createInstanceWrongDriver()
+{
+    QVERIFY( DatabaseManager::getInstance() == nullptr );
+
+    UniMap options = {
+        { "driver_name", "SQLITE" }
     };
 
-    int result = 0;
+    std::unique_ptr<QSqlError> error = DatabaseManager::setupInstance( options );
 
-    for( QObject* test : tests )
-    {
-        result |= QTest::qExec( test, argc, argv );
-    }
+    QVERIFY( error != nullptr );
+}
 
-    return( result );
+void DatabaseManagerTests::createInstanceNonExistantFile()
+{
+    QVERIFY( DatabaseManager::getInstance() == nullptr );
+
+    UniMap options = {
+        { "driver_name",        "QSQLITE" },
+        { "database_name",      "some-non-existant-database-file.s3db" },
+        { "create_non_exist",   false }
+    };
+
+    std::unique_ptr<QSqlError> error = DatabaseManager::setupInstance( options );
+
+    QVERIFY( error != nullptr );
+    QVERIFY( error->databaseText() == "Database file does not exists" );
+    QVERIFY( error->driverText() == "Error on instance creation" );
 }

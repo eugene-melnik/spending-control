@@ -9,15 +9,23 @@ TARGET = spending-control_tests
 TEMPLATE = app
 
 
-QT = core gui widgets testlib
-CONFIG += qt warn_on thread console
+QT = core gui widgets sql testlib
+CONFIG += qt warn_on thread console testcase
 
 LIBS += -lstdc++ -lpthread
 
+QMAKE_CXXFLAGS += -std=c++11
 
-HEADERS += 
 
-SOURCES += main.cpp
+INCLUDEPATH += $$PWD/../src/
+
+
+HEADERS += ../src/database/manager.h \
+           database/manager_tests.h
+
+SOURCES += ../src/database/manager.cpp \
+           database/manager_tests.cpp \
+           main.cpp
 
 
     # Debug & Release #

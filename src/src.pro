@@ -14,7 +14,7 @@ TEMPLATE = app
 #CONFIG += release
 #CONFIG += debug console
 
-QT = core gui widgets
+QT = core gui widgets sql
 CONFIG += qt warn_on thread
 
 QMAKE_CXXFLAGS += -std=c++11
