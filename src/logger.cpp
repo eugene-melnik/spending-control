@@ -95,7 +95,7 @@ void Logger::funcStart( const QString& funcName, UniMap arguments )
 
     this->functionTimers.insert( funcName, startTime );
 
-    this->log( QString( "Starting: %1\n" ).arg( message ), Level::DEBUG );
+    this->log( "Starting: " + message, Level::DEBUG );
 }
 
 
@@ -110,7 +110,7 @@ void Logger::funcDone( const QString& funcName )
         timeUnit = "s";
     }
 
-    this->log( QString( "Done: %1 in %2 %3\n" ).arg(
+    this->log( QString( "Done: %1 in %2 %3" ).arg(
         funcName,
         QString::number( timeElapsed ),
         timeUnit

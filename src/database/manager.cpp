@@ -41,12 +41,9 @@ DatabaseManager* DatabaseManager::instance = nullptr;
 
 std::unique_ptr<QSqlError> DatabaseManager::setupInstance( UniMap options )
 {
-    std::unique_ptr<QSqlError> error;
+    DatabaseManager::clearInstance();
 
-    if( DatabaseManager::instance != nullptr )
-    {
-        DatabaseManager::clearInstance();
-    }
+    std::unique_ptr<QSqlError> error;
 
     if( !options.contains( "create_non_exist" ) )
     {
