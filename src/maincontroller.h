@@ -1,6 +1,6 @@
 /*************************************************************************************************
  *                                                                                                *
- *  file: main.cpp                                                                                *
+ *  file: maincontroller.h                                                                        *
  *                                                                                                *
  *  SpendingControl                                                                               *
  *  Copyright (C) 2017 Eugene Melnik <jeka7js@gmail.com>                                          *
@@ -18,32 +18,36 @@
  *                                                                                                *
   *************************************************************************************************/
 
-#include "defines.h"
-#include "maincontroller.h"
-#include "version.h"
+#ifndef MAIN_CONTROLLER_H
+#define MAIN_CONTROLLER_H
+
+#include "mainwindow.h"
 
 #include <QApplication>
-#include <memory>
+#include <QObject>
 
 
-int main( int argc, char** argv )
+class MainController : public QObject
 {
-    AppLogger->funcStart( "main", {{ "argc", argc }} );
+    Q_OBJECT
 
-    QApplication::setOrganizationName( Application::orgName );
-    QApplication::setOrganizationDomain( Application::orgDomain );
+    public:
+        MainController( QApplication& app );
+        ~MainController();
 
-    QApplication::setApplicationName( Application::appName );
-    QApplication::setApplicationDisplayName( Application::appNameGui );
-    QApplication::setApplicationVersion( Application::appVersionFull );
+    public slots:
+        void exit();
 
-    QApplication spendingControl( argc, argv );
-    std::unique_ptr<MainController> mainController( new MainController( spendingControl ) );
+    protected:
+        QString getDefaultConfigDir() const;
 
-    int result = spendingControl.exec();
+    private:
+        void handleCommandLine( QApplication& app );
+        void createDialogs();
+        void connectSignals();
 
-    AppLogger->funcDone( "main" );
-    AppLogger->debug( "" );
+        MainWindow* mainWindow;
+};
 
-    return( result );
-}
+
+#endif // MAIN_CONTROLLER_H

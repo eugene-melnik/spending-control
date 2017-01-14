@@ -28,11 +28,11 @@
 namespace Application
 {
       // Main information
-    const QString appName = "antispender";
-    const QString appNameGui = "AntiSpender";
+    const QString appName = "spending-control";
+    const QString appNameGui = "SpendingControl";
     const QString appLicense = "GNU GPL v2";
     const QString appWebsite = "-";
-    const QString appDescription = QObject::tr( "" );
+    const QString appDescription = QObject::tr( " -- description -- " ); // FIXME
 
       // Author
     const QString appAuthor = "Eugene Melnik <jeka7js@gmail.com>";

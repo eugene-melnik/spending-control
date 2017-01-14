@@ -31,11 +31,32 @@ LIBS += -lstdc++ -lpthread
 
     # Source files #
 
-HEADERS += version.h
+HEADERS += \
+    database/manager.h \
+    database/query.h \
+    database/migration/base.h \
+    commandlineparser.h \
+    defines.h \
+    logger.h \
+    maincontroller.h \
+    mainwindow.h \
+    settings.h \
+    types.h \
+    version.h
 
-SOURCES += main.cpp
+SOURCES += \
+    database/manager.cpp \
+    database/query.cpp \
+    database/migration/base.cpp \
+    commandlineparser.cpp \
+    logger.cpp \
+    main.cpp \
+    maincontroller.cpp \
+    mainwindow.cpp \
+    settings.cpp
 
-#FORMS += 
+FORMS += \
+    mainwindow.ui
 
 
     # Translations #
@@ -75,4 +96,3 @@ DESTDIR = ./
 target.path = /usr/bin/
 
 INSTALLS = target
-
