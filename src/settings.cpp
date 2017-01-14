@@ -41,6 +41,24 @@ void Settings::clearInstance()
 }
 
 
+QString Settings::getConfigFilename() const
+{
+    return( this->fileName() );
+}
+
+
+QString Settings::getDatabaseFilename() const
+{
+    return( this->getValue( "database", "filename" ).toString() );
+}
+
+
+void Settings::setDatabaseFilename( const QString& filename )
+{
+    this->setValue( "database", "filename", filename );
+}
+
+
 Settings::Settings( const QString& configFilename )
     : QSettings( configFilename, QSettings::Format::IniFormat )
 {

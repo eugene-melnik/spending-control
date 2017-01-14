@@ -70,6 +70,8 @@ class DatabaseManager
             QTDS
         };
 
+        QSqlDatabase& getDatabase();
+
     protected:
         DatabaseManager( const UniMap& options );
         ~DatabaseManager();

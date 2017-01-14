@@ -67,7 +67,7 @@ std::unique_ptr<QSqlError> DatabaseManager::setupInstance( UniMap options )
         }
         else
         {
-            if( DatabaseManager::instance->database.isOpenError() || !DatabaseManager::instance->database.isOpen() )
+            if( !DatabaseManager::instance->database.isOpen() )
             {
                 error = std::unique_ptr<QSqlError>(
                     new QSqlError( DatabaseManager::instance->database.lastError() )
@@ -96,6 +96,12 @@ void DatabaseManager::clearInstance()
         delete DatabaseManager::instance;
         DatabaseManager::instance = nullptr;
     }
+}
+
+
+QSqlDatabase& DatabaseManager::getDatabase()
+{
+    return( this->database );
 }
 
 

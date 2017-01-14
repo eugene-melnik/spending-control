@@ -1,6 +1,6 @@
 /*************************************************************************************************
  *                                                                                                *
- *  file: settings.h                                                                              *
+ *  file: query.cpp                                                                               *
  *                                                                                                *
  *  SpendingControl                                                                               *
  *  Copyright (C) 2017 Eugene Melnik <jeka7js@gmail.com>                                          *
@@ -18,57 +18,18 @@
  *                                                                                                *
   *************************************************************************************************/
 
-#ifndef SETTINGS_H
-#define SETTINGS_H
-
-#include <QSettings>
-#include <QString>
+#include "query.h"
 
 
-class Settings : protected QSettings
+DatabaseQuery::DatabaseQuery()
+    : QSqlQuery()
 {
-    public:
-        /*!
-         *
-         */
-        static Settings* getInstance() { return( Settings::instance ); }
-
-        /*!
-         *
-         */
-        static void setupInstance( const QString& configFilename );
-
-        /*!
-         *
-         */
-        static void clearInstance();
-
-        /*!
-         *
-         */
-        QString getConfigFilename() const;
-
-        /* Get */
-
-        QString getDatabaseFilename() const;
-
-        /* Set */
-
-        void setDatabaseFilename( const QString& filename );
-
-    protected:
-        Settings( const QString& configFilename );
-        ~Settings() = default;
-
-        int getSettingsVersion() const;
-        void setSettingsVersion( int version );
-
-        QVariant getValue( const QString& section, const QString& key, QVariant defaultValue = QVariant() ) const;
-        void setValue( const QString& section, const QString& key, QVariant value );
-
-    private:
-        static Settings* instance;
-};
+    //
+}
 
 
-#endif // SETTINGS_H
+DatabaseQuery::DatabaseQuery( QSqlDatabase database )
+    : QSqlQuery( database )
+{
+    //
+}

@@ -43,6 +43,7 @@ class MainController : public QObject
 
     private:
         void handleCommandLine( QApplication& app );
+        void setupDatabase();
         void createDialogs();
         void connectSignals();
 

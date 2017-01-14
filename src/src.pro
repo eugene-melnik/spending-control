@@ -33,8 +33,8 @@ LIBS += -lstdc++ -lpthread
 
 HEADERS += \
     database/manager.h \
+    database/migration.h \
     database/query.h \
-    database/migration/base.h \
     commandlineparser.h \
     defines.h \
     logger.h \
@@ -46,8 +46,8 @@ HEADERS += \
 
 SOURCES += \
     database/manager.cpp \
+    database/migration.cpp \
     database/query.cpp \
-    database/migration/base.cpp \
     commandlineparser.cpp \
     logger.cpp \
     main.cpp \

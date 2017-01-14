@@ -1,6 +1,6 @@
 /*************************************************************************************************
  *                                                                                                *
- *  file: settings.h                                                                              *
+ *  file: migration.h                                                                             *
  *                                                                                                *
  *  SpendingControl                                                                               *
  *  Copyright (C) 2017 Eugene Melnik <jeka7js@gmail.com>                                          *
@@ -18,57 +18,34 @@
  *                                                                                                *
   *************************************************************************************************/
 
-#ifndef SETTINGS_H
-#define SETTINGS_H
+#ifndef DATABASE_MIGRATION_H
+#define DATABASE_MIGRATION_H
 
-#include <QSettings>
-#include <QString>
+#include <QMap>
+#include <QSqlDatabase>
+#include <QStringList>
 
 
-class Settings : protected QSettings
+class DatabaseMigration
 {
     public:
-        /*!
-         *
-         */
-        static Settings* getInstance() { return( Settings::instance ); }
+        DatabaseMigration( QSqlDatabase database );
+        ~DatabaseMigration() {}
 
-        /*!
-         *
-         */
-        static void setupInstance( const QString& configFilename );
+        int getCurrentVersion() const;
 
-        /*!
-         *
-         */
-        static void clearInstance();
+        bool migrateToVersion( int version );
 
-        /*!
-         *
-         */
-        QString getConfigFilename() const;
-
-        /* Get */
-
-        QString getDatabaseFilename() const;
-
-        /* Set */
-
-        void setDatabaseFilename( const QString& filename );
+        QString getLastError() const;
 
     protected:
-        Settings( const QString& configFilename );
-        ~Settings() = default;
+        void setupMigrations();
+        bool updateMigrationVersion( int version );
 
-        int getSettingsVersion() const;
-        void setSettingsVersion( int version );
-
-        QVariant getValue( const QString& section, const QString& key, QVariant defaultValue = QVariant() ) const;
-        void setValue( const QString& section, const QString& key, QVariant value );
-
-    private:
-        static Settings* instance;
+        QMap<int,QStringList> migrationsList;
+        QSqlDatabase database;
+        QString error;
 };
 
 
-#endif // SETTINGS_H
+#endif // DATABASE_MIGRATION_H

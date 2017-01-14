@@ -1,6 +1,6 @@
 /*************************************************************************************************
  *                                                                                                *
- *  file: settings.h                                                                              *
+ *  file: query.h                                                                                 *
  *                                                                                                *
  *  SpendingControl                                                                               *
  *  Copyright (C) 2017 Eugene Melnik <jeka7js@gmail.com>                                          *
@@ -18,57 +18,19 @@
  *                                                                                                *
   *************************************************************************************************/
 
-#ifndef SETTINGS_H
-#define SETTINGS_H
+#ifndef DATABASE_QUERY_H
+#define DATABASE_QUERY_H
 
-#include <QSettings>
-#include <QString>
+#include <QSqlQuery>
+#include <QVariant>
 
 
-class Settings : protected QSettings
+class DatabaseQuery : public QSqlQuery
 {
     public:
-        /*!
-         *
-         */
-        static Settings* getInstance() { return( Settings::instance ); }
-
-        /*!
-         *
-         */
-        static void setupInstance( const QString& configFilename );
-
-        /*!
-         *
-         */
-        static void clearInstance();
-
-        /*!
-         *
-         */
-        QString getConfigFilename() const;
-
-        /* Get */
-
-        QString getDatabaseFilename() const;
-
-        /* Set */
-
-        void setDatabaseFilename( const QString& filename );
-
-    protected:
-        Settings( const QString& configFilename );
-        ~Settings() = default;
-
-        int getSettingsVersion() const;
-        void setSettingsVersion( int version );
-
-        QVariant getValue( const QString& section, const QString& key, QVariant defaultValue = QVariant() ) const;
-        void setValue( const QString& section, const QString& key, QVariant value );
-
-    private:
-        static Settings* instance;
+        DatabaseQuery();
+        DatabaseQuery( QSqlDatabase database );
 };
 
 
-#endif // SETTINGS_H
+#endif // DATABASE_QUERY_H

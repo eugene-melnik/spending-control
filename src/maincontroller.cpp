@@ -18,6 +18,8 @@
  *                                                                                                *
   *************************************************************************************************/
 
+#include "database/manager.h"
+#include "database/migration.h"
 #include "commandlineparser.h"
 #include "defines.h"
 #include "maincontroller.h"
@@ -25,6 +27,7 @@
 #include "version.h"
 
 #include <cstdio>
+#include <QFileInfo>
 #include <QProcessEnvironment>
 
 
@@ -33,6 +36,7 @@ MainController::MainController( QApplication& app )
     AppLogger->funcStart( "MainController::MainController" );
 
     this->handleCommandLine( app );
+    this->setupDatabase();
     this->createDialogs();
     this->connectSignals();
 
@@ -94,7 +98,7 @@ void MainController::handleCommandLine( QApplication& app )
 
         if( !ok )
         {
-            AppLogger->warn( "Not supported log destination: " + logDestination );
+            AppLogger->crit( "Not supported log destination: " + logDestination );
             fprintf( stderr, "Not supported log destination: %s\n", logDestination.toUtf8().data() );
             ::exit( 1 );
         }
@@ -106,7 +110,7 @@ void MainController::handleCommandLine( QApplication& app )
 
         if( !ok )
         {
-            AppLogger->warn( "Not supported log level: " + logMinLevel );
+            AppLogger->crit( "Not supported log level: " + logMinLevel );
             fprintf( stderr, "Not supported log level: %s\n", logMinLevel.toUtf8().data() );
             ::exit( 1 );
         }
@@ -126,6 +130,49 @@ void MainController::handleCommandLine( QApplication& app )
 
     AppLogger->info( "Config filename: " + configFilename );
     Settings::setupInstance( configFilename );
+}
+
+
+void MainController::setupDatabase()
+{
+    QString databaseFilename = Settings::getInstance()->getDatabaseFilename();
+
+    if( databaseFilename.isEmpty() )
+    {
+        databaseFilename = QFileInfo( Settings::getInstance()->getConfigFilename() ).absolutePath() + "/database.s3db";
+    }
+
+    AppLogger->info( "Database filename: " + databaseFilename );
+
+    std::unique_ptr<QSqlError> error = DatabaseManager::setupInstance( {
+        { "driver_name",    "QSQLITE" },
+        { "database_name",  databaseFilename }
+    } );
+
+    if( error )
+    {
+        AppLogger->crit( "Database opening error: " + error->text() );
+        fprintf( stderr, "Database opening error: %s\n", error->text().toUtf8().data() );
+        ::exit( 1 );
+    }
+
+    DatabaseMigration migrator( DatabaseManager::getInstance()->getDatabase() );
+
+    AppLogger->info( QString( "Migrate database from version %1 to version %2" )
+        .arg( migrator.getCurrentVersion() )
+        .arg( Application::databaseVersion )
+    );
+
+    if( migrator.migrateToVersion( Application::databaseVersion ) )
+    {
+        AppLogger->info( "Done" );
+    }
+    else
+    {
+        AppLogger->crit( "Database migration error: " + migrator.getLastError() );
+        fprintf( stderr, "Database migration error: %s\n", migrator.getLastError().toUtf8().data() );
+        ::exit( 1 );
+    }
 }
 
 
