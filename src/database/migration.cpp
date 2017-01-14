@@ -36,9 +36,9 @@ int DatabaseMigration::getCurrentVersion() const
     int version = 0;
 
     DatabaseQuery query( this->database );
-    query.exec( "SELECT value FROM service WHERE name = 'migration_version'" );
+    query.exec( "SELECT value FROM service_options WHERE name = 'migration_version'" );
 
-    if( query.isActive() && query.first() )
+    if( query.first() )
     {
         version = query.value( 0 ).toInt();
     }
@@ -106,12 +106,53 @@ void DatabaseMigration::setupMigrations()
         1,
         {
             "PRAGMA encoding = 'UTF-8';",
-            "CREATE TABLE `service_options` (\
-                `name`	TEXT NOT NULL,\
-                `value`	TEXT,\
-                PRIMARY KEY(name)\
+
+            "CREATE TABLE `service_options` ( \
+                `name`              TEXT NOT NULL, \
+                `value`             TEXT, \
+                PRIMARY KEY(name) \
             );",
+
             "INSERT INTO service_options (name, value) VALUES ('migration_version', 0);"
+        }
+    );
+
+    /*
+     * Initial versions of tables 'accounts', 'transactions'.
+     */
+    this->migrationsList.insert(
+        2,
+        {
+            "CREATE TABLE `accounts` ( \
+                `id`                INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, \
+                `name`              TEXT NOT NULL, \
+                `description`       TEXT NOT NULL, \
+                `type`              INTEGER NOT NULL DEFAULT '0', \
+                `initial_balance`   INTEGER DEFAULT '0', \
+                `minimal_balance`   INTEGER DEFAULT '0' \
+            );",
+            "CREATE INDEX accounts_name_idx ON accounts(name);",
+            "CREATE INDEX accounts_type_idx ON accounts(type);",
+
+            "CREATE TABLE `categories` ( \
+                `id`                INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, \
+                `name`              TEXT NOT NULL, \
+                `description`       TEXT NOT NULL, \
+                `parent_category_id` INTEGER \
+            );",
+
+            "CREATE TABLE `transactions` ( \
+                `id`                INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, \
+                `type`              INTEGER NOT NULL DEFAULT '0', \
+                `amount`            INTEGER NOT NULL DEFAULT '0', \
+                `timestamp`         TEXT NOT NULL, \
+                `source_account_id` INTEGER NOT NULL, \
+                `category_id`       INTEGER NOT NULL, \
+                `notes`             TEXT \
+            );",
+            "CREATE INDEX transactions_type_idx ON transactions(type);",
+            "CREATE INDEX transactions_timestamp_idx ON transactions(timestamp);",
+            "CREATE INDEX transactions_category_id_idx ON transactions(category_id);"
         }
     );
 }

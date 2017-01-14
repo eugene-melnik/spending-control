@@ -140,6 +140,7 @@ void MainController::setupDatabase()
     if( databaseFilename.isEmpty() )
     {
         databaseFilename = QFileInfo( Settings::getInstance()->getConfigFilename() ).absolutePath() + "/database.s3db";
+        Settings::getInstance()->setDatabaseFilename( databaseFilename );
     }
 
     AppLogger->info( "Database filename: " + databaseFilename );

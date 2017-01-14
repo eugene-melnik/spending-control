@@ -47,7 +47,7 @@ namespace Application
     const QString appVersionFull = QString( "%1.%2.%3" ).arg( verMajor ).arg( verMinor ).arg( verFix );
     const QString appBuildDate = QString( __DATE__ );
 
-    const quint8  databaseVersion = 1;
+    const quint8  databaseVersion = 2;
 
     const quint8 settingsVersion = 1;
 
