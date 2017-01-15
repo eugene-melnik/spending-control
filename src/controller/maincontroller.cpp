@@ -20,10 +20,10 @@
 
 #include "database/manager.h"
 #include "database/migration.h"
-#include "commandlineparser.h"
+#include "tool/commandlineparser.h"
+#include "tool/settings.h"
 #include "defines.h"
 #include "maincontroller.h"
-#include "settings.h"
 #include "version.h"
 
 #include <cstdio>
@@ -49,6 +49,31 @@ MainController::MainController( QApplication& app )
 MainController::~MainController()
 {
     delete this->mainWindow;
+}
+
+
+void MainController::addTransaction()
+{
+    //
+}
+
+
+void MainController::manageAccounts()
+{
+    if( this->accountsListDialog == nullptr )
+    {
+        this->accountsListDialog = new AccountsListDialog( this->mainWindow );
+    }
+
+    // setup
+
+    this->accountsListDialog->show();
+}
+
+
+void MainController::manageCategories()
+{
+    //
 }
 
 
@@ -188,6 +213,10 @@ void MainController::createDialogs()
 void MainController::connectSignals()
 {
     AppLogger->debug( "MainController::connectSignals()" );
+
+    this->connect( this->mainWindow, SIGNAL(addTransaction()), this, SLOT(addTransaction()) );
+    this->connect( this->mainWindow, SIGNAL(manageAccounts()), this, SLOT(manageAccounts()) );
+    this->connect( this->mainWindow, SIGNAL(manageCategories()), this, SLOT(manageCategories()) );
 
     this->connect( this->mainWindow, SIGNAL(aboutToClose()), this, SLOT(exit()) );
 }

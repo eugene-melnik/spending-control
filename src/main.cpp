@@ -18,8 +18,8 @@
  *                                                                                                *
   *************************************************************************************************/
 
+#include "controller/maincontroller.h"
 #include "defines.h"
-#include "maincontroller.h"
 #include "version.h"
 
 #include <QApplication>

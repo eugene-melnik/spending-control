@@ -1,6 +1,6 @@
 /*************************************************************************************************
  *                                                                                                *
- *  file: mainwindow.cpp                                                                          *
+ *  file: mainwindow.h                                                                            *
  *                                                                                                *
  *  SpendingControl                                                                               *
  *  Copyright (C) 2017 Eugene Melnik <jeka7js@gmail.com>                                          *
@@ -18,39 +18,36 @@
  *                                                                                                *
   *************************************************************************************************/
 
-#include "defines.h"
-#include "mainwindow.h"
-#include "version.h"
+#ifndef MAINWINDOW_H
+#define MAINWINDOW_H
+
+#include <QCloseEvent>
+#include <QMainWindow>
+
+#include "ui_mainwindow.h"
 
 
-MainWindow::MainWindow( QWidget* parent ) : QMainWindow( parent )
+class MainWindow : public QMainWindow, protected Ui::MainWindow
 {
-    this->setupUi( this );
-    this->setAttribute( Qt::WA_QuitOnClose );
+    Q_OBJECT
 
-    this->setupMenubar();
-    this->setupToolbar();
+    public:
+        explicit MainWindow( QWidget* parent = nullptr );
 
-    #ifdef QT_DEBUG
-        this->setWindowTitle( " -= DEVELOPMENT BUILD =- version " + Application::appVersionFull );
-    #endif
-}
+    signals:
+        void addTransaction();
+        void manageAccounts();
+        void manageCategories();
 
+        void aboutToClose();
 
-void MainWindow::closeEvent( QCloseEvent* event )
-{
-    emit this->aboutToClose();
-    event->accept();
-}
+    protected slots:
+        void closeEvent( QCloseEvent* event );
 
-
-void MainWindow::setupMenubar()
-{
-    this->connect( this->action_FileExit, SIGNAL(triggered()), this, SLOT(close()) );
-}
+    protected:
+        void setupMenubar();
+        void setupToolbar();
+};
 
 
-void MainWindow::setupToolbar()
-{
-    this->toolbarMain->addAction( tr( "Exit" ), this, SLOT(close()) );
-}
+#endif // MAINWINDOW_H

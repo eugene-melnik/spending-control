@@ -21,7 +21,8 @@
 #ifndef MAIN_CONTROLLER_H
 #define MAIN_CONTROLLER_H
 
-#include "mainwindow.h"
+#include "window/accountslistdialog.h"
+#include "window/mainwindow.h"
 
 #include <QApplication>
 #include <QObject>
@@ -35,7 +36,13 @@ class MainController : public QObject
         MainController( QApplication& app );
         ~MainController();
 
-    public slots:
+    protected slots:
+        void addTransaction();
+
+        void manageAccounts();
+
+        void manageCategories();
+
         void exit();
 
     protected:
@@ -47,7 +54,8 @@ class MainController : public QObject
         void createDialogs();
         void connectSignals();
 
-        MainWindow* mainWindow;
+        AccountsListDialog* accountsListDialog = nullptr;
+        MainWindow* mainWindow = nullptr;
 };
 
 

@@ -11,8 +11,7 @@ TARGET = spending-control
 TEMPLATE = app
 
 
-#CONFIG += release
-#CONFIG += debug console
+CONFIG += console
 
 QT = core gui widgets sql
 CONFIG += qt warn_on thread
@@ -32,31 +31,34 @@ LIBS += -lstdc++ -lpthread
     # Source files #
 
 HEADERS += \
+    controller/maincontroller.h \
     database/manager.h \
     database/migration.h \
     database/query.h \
-    commandlineparser.h \
+    tool/commandlineparser.h \
+    tool/logger.h \
+    tool/settings.h \
+    window/accountslistdialog.h \
+    window/mainwindow.h \
     defines.h \
-    logger.h \
-    maincontroller.h \
-    mainwindow.h \
-    settings.h \
     types.h \
     version.h
 
 SOURCES += \
+    controller/maincontroller.cpp \
     database/manager.cpp \
     database/migration.cpp \
     database/query.cpp \
-    commandlineparser.cpp \
-    logger.cpp \
-    main.cpp \
-    maincontroller.cpp \
-    mainwindow.cpp \
-    settings.cpp
+    tool/commandlineparser.cpp \
+    tool/logger.cpp \
+    tool/settings.cpp \
+    window/accountslistdialog.cpp \
+    window/mainwindow.cpp \
+    main.cpp
 
 FORMS += \
-    mainwindow.ui
+    window/mainwindow.ui \
+    window/accountslistdialog.ui
 
 
     # Translations #

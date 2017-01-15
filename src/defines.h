@@ -2,7 +2,7 @@
 #ifndef DEFINES_H
 #define DEFINES_H
 
-#include "logger.h"
+#include "tool/logger.h"
 
 
 #define AppLogger Logger::getInstance()
