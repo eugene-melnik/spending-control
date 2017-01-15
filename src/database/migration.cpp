@@ -59,9 +59,9 @@ bool DatabaseMigration::migrateToVersion( int version )
     this->error.clear();
     this->database.transaction();
 
-    while( currentVersion < version )
+    while( currentVersion++ < version )
     {
-        QStringList migrations = this->migrationsList.value( currentVersion + 1 );
+        QStringList migrations = this->migrationsList.value( currentVersion );
 
         for( const QString& migration : migrations )
         {
@@ -70,12 +70,16 @@ bool DatabaseMigration::migrateToVersion( int version )
             if( query.lastError().isValid() )
             {
                 this->database.rollback();
-                this->error = query.lastError().text();
+
+                this->error = QString( "[migration %1, part \"%2\"] %3" ).arg(
+                    QString::number( currentVersion ),
+                    migration.simplified(),
+                    query.lastError().text()
+                );
+
                 return( false );
             }
         }
-
-        ++currentVersion;
     };
 
     if( !this->updateMigrationVersion( version ) )
@@ -106,6 +110,7 @@ void DatabaseMigration::setupMigrations()
         1,
         {
             "PRAGMA encoding = 'UTF-8';",
+            "PRAGMA foreign_keys = ON;",
 
             "CREATE TABLE `service_options` ( \
                 `name`              TEXT NOT NULL, \
@@ -118,7 +123,7 @@ void DatabaseMigration::setupMigrations()
     );
 
     /*
-     * Initial versions of tables 'accounts', 'transactions'.
+     * Initial versions of tables 'accounts', 'categories' and 'transactions'.
      */
     this->migrationsList.insert(
         2,
@@ -129,29 +134,42 @@ void DatabaseMigration::setupMigrations()
                 `description`       TEXT NOT NULL, \
                 `type`              INTEGER NOT NULL DEFAULT '0', \
                 `initial_balance`   INTEGER DEFAULT '0', \
-                `minimal_balance`   INTEGER DEFAULT '0' \
+                `minimal_balance`   INTEGER DEFAULT '0', \
+                `created_at`        TEXT, \
+                `closed_at`         TEXT, \
+                `deleted_at`        TEXT \
             );",
             "CREATE INDEX accounts_name_idx ON accounts(name);",
             "CREATE INDEX accounts_type_idx ON accounts(type);",
+            "CREATE INDEX accounts_created_at_idx ON accounts(created_at);",
 
             "CREATE TABLE `categories` ( \
                 `id`                INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, \
                 `name`              TEXT NOT NULL, \
-                `description`       TEXT NOT NULL, \
-                `parent_category_id` INTEGER \
+                `description`       TEXT, \
+                `parent_category_id` INTEGER DEFAULT '1', \
+                `system`            INTEGER DEFAULT '0', \
+                `deleted_at`        TEXT, \
+                FOREIGN KEY (parent_category_id) REFERENCES categories(id) \
             );",
+            "INSERT INTO categories (id, name, parent_category_id, system) VALUES (1, '<root>', null, 1);",
 
             "CREATE TABLE `transactions` ( \
                 `id`                INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, \
                 `type`              INTEGER NOT NULL DEFAULT '0', \
                 `amount`            INTEGER NOT NULL DEFAULT '0', \
-                `timestamp`         TEXT NOT NULL, \
+                `date`              TEXT NOT NULL, \
+                `planned`           INTEGER DEFAULT '0', \
                 `source_account_id` INTEGER NOT NULL, \
+                `destination_account_id` INTEGER, \
                 `category_id`       INTEGER NOT NULL, \
-                `notes`             TEXT \
+                `notes`             TEXT, \
+                FOREIGN KEY (source_account_id) REFERENCES accounts(id), \
+                FOREIGN KEY (destination_account_id) REFERENCES accounts(id), \
+                FOREIGN KEY (category_id) REFERENCES categories(id) \
             );",
             "CREATE INDEX transactions_type_idx ON transactions(type);",
-            "CREATE INDEX transactions_timestamp_idx ON transactions(timestamp);",
+            "CREATE INDEX transactions_date_idx ON transactions(date);",
             "CREATE INDEX transactions_category_id_idx ON transactions(category_id);"
         }
     );
