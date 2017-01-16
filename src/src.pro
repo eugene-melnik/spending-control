@@ -35,6 +35,7 @@ HEADERS += \
     database/manager.h \
     database/migration.h \
     database/query.h \
+    model/accountsmodel.h \
     tool/commandlineparser.h \
     tool/logger.h \
     tool/settings.h \
@@ -49,6 +50,7 @@ SOURCES += \
     database/manager.cpp \
     database/migration.cpp \
     database/query.cpp \
+    model/accountsmodel.cpp \
     tool/commandlineparser.cpp \
     tool/logger.cpp \
     tool/settings.cpp \

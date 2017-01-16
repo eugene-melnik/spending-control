@@ -20,6 +20,7 @@
 
 #include "database/manager.h"
 #include "database/migration.h"
+#include "model/accountsmodel.h"
 #include "tool/commandlineparser.h"
 #include "tool/settings.h"
 #include "defines.h"
@@ -52,26 +53,27 @@ MainController::~MainController()
 }
 
 
-void MainController::addTransaction()
+void MainController::showAddTransaction()
 {
     //
 }
 
 
-void MainController::manageAccounts()
+void MainController::showManageAccounts()
 {
     if( this->accountsListDialog == nullptr )
     {
         this->accountsListDialog = new AccountsListDialog( this->mainWindow );
     }
 
-    // setup
+    AccountsModel* accountsModel = new AccountsModel( DatabaseManager::getInstance()->getDatabase() );
+    this->accountsListDialog->setListModel( accountsModel );
 
     this->accountsListDialog->show();
 }
 
 
-void MainController::manageCategories()
+void MainController::showManageCategories()
 {
     //
 }
@@ -214,9 +216,9 @@ void MainController::connectSignals()
 {
     AppLogger->debug( "MainController::connectSignals()" );
 
-    this->connect( this->mainWindow, SIGNAL(addTransaction()), this, SLOT(addTransaction()) );
-    this->connect( this->mainWindow, SIGNAL(manageAccounts()), this, SLOT(manageAccounts()) );
-    this->connect( this->mainWindow, SIGNAL(manageCategories()), this, SLOT(manageCategories()) );
+    this->connect( this->mainWindow, SIGNAL(addTransaction()), this, SLOT(showAddTransaction()) );
+    this->connect( this->mainWindow, SIGNAL(manageAccounts()), this, SLOT(showManageAccounts()) );
+    this->connect( this->mainWindow, SIGNAL(manageCategories()), this, SLOT(showManageCategories()) );
 
     this->connect( this->mainWindow, SIGNAL(aboutToClose()), this, SLOT(exit()) );
 }

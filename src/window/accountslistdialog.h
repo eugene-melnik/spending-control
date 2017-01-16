@@ -17,8 +17,13 @@ class AccountsListDialog : public QDialog, protected Ui::AccountsListDialog
 
         void setListModel( QAbstractItemModel* model );
 
+        QAbstractItemModel* getListModel() const;
+
     signals:
         //
+
+    protected:
+        QAbstractItemModel* listModel = nullptr;
 };
 
 #endif // ACCOUNTSLISTDIALOG_H

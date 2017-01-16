@@ -11,5 +11,17 @@ AccountsListDialog::AccountsListDialog( QWidget* parent )
 
 void AccountsListDialog::setListModel( QAbstractItemModel* model )
 {
-    this->lvAccounts->setModel( model );
+    if( this->listModel != nullptr )
+    {
+        delete this->listModel;
+    }
+
+    this->listModel = model;
+    this->lvAccounts->setModel( this->listModel );
+}
+
+
+QAbstractItemModel* AccountsListDialog::getListModel() const
+{
+    return( this->listModel );
 }

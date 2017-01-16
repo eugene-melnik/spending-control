@@ -42,7 +42,7 @@ class MainWindow : public QMainWindow, protected Ui::MainWindow
         void aboutToClose();
 
     protected slots:
-        void closeEvent( QCloseEvent* event );
+        void closeEvent( QCloseEvent* event ) override;
 
     protected:
         void setupMenubar();

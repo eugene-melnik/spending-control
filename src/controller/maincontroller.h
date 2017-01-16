@@ -37,11 +37,11 @@ class MainController : public QObject
         ~MainController();
 
     protected slots:
-        void addTransaction();
+        void showAddTransaction();
 
-        void manageAccounts();
+        void showManageAccounts();
 
-        void manageCategories();
+        void showManageCategories();
 
         void exit();
 
