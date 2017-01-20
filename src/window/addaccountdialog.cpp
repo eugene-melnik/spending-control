@@ -1,6 +1,6 @@
 /*************************************************************************************************
  *                                                                                                *
- *  file: accountsmodel.h                                                                         *
+ *  file: addaccountdialog.cpp                                                                    *
  *                                                                                                *
  *  SpendingControl                                                                               *
  *  Copyright (C) 2017 Eugene Melnik <jeka7js@gmail.com>                                          *
@@ -18,48 +18,24 @@
  *                                                                                                *
   *************************************************************************************************/
 
-#ifndef ACCOUNTS_MODEL_H
-#define ACCOUNTS_MODEL_H
-
-#include <QAbstractTableModel>
-#include <QMap>
-#include <QStringList>
-#include <QSqlDatabase>
-#include <QVariantList>
-
-#include "defines.h"
+#include "addaccountdialog.h"
 
 
-class AccountsModel : public QAbstractTableModel
+AddAccountDialog::AddAccountDialog( QWidget* parent )
 {
-    Q_OBJECT
-
-    public:
-        AccountsModel( QSqlDatabase database );
-        ~AccountsModel() {}
-
-        bool addAccountRecord( const UniMap& fieldsData );
-
-        int rowCount( const QModelIndex& parent = QModelIndex() ) const override;
-        int columnCount( const QModelIndex& parent = QModelIndex() ) const override;
-
-        QVariant data( const QModelIndex& index, int role = Qt::DisplayRole ) const override;
-        QVariant headerData( int section, Qt::Orientation orientation, int role = Qt::DisplayRole ) const override;
-
-        static QStringList getTypes();
-        static QStringList getCurrencies();
-
-    protected:
-        QVariantList getRecord( int row ) const;
-
-        QSqlDatabase database;
-
-        QStringList titles;
-        mutable QMap<int,QVariantList> records;
-
-        static QStringList types;
-        static QMap<QString,QVariantList> currencies; // TODO: move to the separate class
-};
+    this->setWindowTitle( tr( "Add account" ) );
+}
 
 
-#endif // ACCOUNTS_MODEL_H
+void AddAccountDialog::showEvent( QShowEvent* event )
+{
+    this->recordId = 0;
+
+    this->eName->clear();
+    this->eDescription->clear();
+    this->cbType->setCurrentIndex( 0 );
+    this->sbInitialBalance->setValue( 0.0 );
+    this->sbMinimalBalance->setValue( 0.0 );
+
+    event->accept();
+}

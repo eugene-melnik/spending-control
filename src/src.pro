@@ -40,6 +40,8 @@ HEADERS += \
     tool/logger.h \
     tool/settings.h \
     window/accountslistdialog.h \
+    window/addaccountdialog.h \
+    window/editaccountdialog.h \
     window/mainwindow.h \
     defines.h \
     types.h \
@@ -55,12 +57,15 @@ SOURCES += \
     tool/logger.cpp \
     tool/settings.cpp \
     window/accountslistdialog.cpp \
+    window/addaccountdialog.cpp \
+    window/editaccountdialog.cpp \
     window/mainwindow.cpp \
     main.cpp
 
 FORMS += \
-    window/mainwindow.ui \
-    window/accountslistdialog.ui
+    window/accountslistdialog.ui \
+    window/editaccountdialog.ui \
+    window/mainwindow.ui
 
 
     # Translations #

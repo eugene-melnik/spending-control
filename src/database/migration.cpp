@@ -65,7 +65,8 @@ bool DatabaseMigration::migrateToVersion( int version )
 
         for( const QString& migration : migrations )
         {
-            QSqlQuery query = this->database.exec( migration );
+            QString simplifiedQuery = migration.simplified();
+            QSqlQuery query = this->database.exec( simplifiedQuery );
 
             if( query.lastError().isValid() )
             {
@@ -73,7 +74,7 @@ bool DatabaseMigration::migrateToVersion( int version )
 
                 this->error = QString( "[migration %1, part \"%2\"] %3" ).arg(
                     QString::number( currentVersion ),
-                    migration.simplified(),
+                    simplifiedQuery,
                     query.lastError().text()
                 );
 
@@ -133,6 +134,7 @@ void DatabaseMigration::setupMigrations()
                 `name`              TEXT NOT NULL, \
                 `description`       TEXT NOT NULL, \
                 `type`              INTEGER NOT NULL DEFAULT '0', \
+                `currency`          INTEGER NOT NULL DEFAULT '0', \
                 `initial_balance`   INTEGER DEFAULT '0', \
                 `minimal_balance`   INTEGER DEFAULT '0', \
                 `created_at`        TEXT, \
@@ -158,6 +160,7 @@ void DatabaseMigration::setupMigrations()
                 `id`                INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, \
                 `type`              INTEGER NOT NULL DEFAULT '0', \
                 `amount`            INTEGER NOT NULL DEFAULT '0', \
+                `balance_after`     INTEGER NOT NULL DEFAULT '0', \
                 `date`              TEXT NOT NULL, \
                 `planned`           INTEGER DEFAULT '0', \
                 `source_account_id` INTEGER NOT NULL, \

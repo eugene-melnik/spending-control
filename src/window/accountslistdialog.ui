@@ -23,21 +23,21 @@
    <item>
     <layout class="QVBoxLayout" name="vlButtons">
      <item>
-      <widget class="QPushButton" name="buttonAdd">
+      <widget class="QPushButton" name="bAdd">
        <property name="text">
         <string>&amp;Add</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="buttonEdit">
+      <widget class="QPushButton" name="bEdit">
        <property name="text">
         <string>&amp;Edit</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="buttonDelete">
+      <widget class="QPushButton" name="bDelete">
        <property name="text">
         <string>&amp;Delete</string>
        </property>
@@ -57,7 +57,7 @@
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="buttonClose">
+      <widget class="QPushButton" name="bClose">
        <property name="text">
         <string>&amp;Close</string>
        </property>
@@ -70,7 +70,7 @@
  <resources/>
  <connections>
   <connection>
-   <sender>buttonClose</sender>
+   <sender>bClose</sender>
    <signal>clicked()</signal>
    <receiver>AccountsListDialog</receiver>
    <slot>reject()</slot>

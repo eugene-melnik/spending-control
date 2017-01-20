@@ -1,6 +1,6 @@
 /*************************************************************************************************
  *                                                                                                *
- *  file: accountsmodel.h                                                                         *
+ *  file: editaccountdialog.h                                                                     *
  *                                                                                                *
  *  SpendingControl                                                                               *
  *  Copyright (C) 2017 Eugene Melnik <jeka7js@gmail.com>                                          *
@@ -18,48 +18,36 @@
  *                                                                                                *
   *************************************************************************************************/
 
-#ifndef ACCOUNTS_MODEL_H
-#define ACCOUNTS_MODEL_H
+#ifndef EDIT_ACCOUNT_DIALOG_H
+#define EDIT_ACCOUNT_DIALOG_H
 
-#include <QAbstractTableModel>
-#include <QMap>
+#include <QDialog>
 #include <QStringList>
-#include <QSqlDatabase>
-#include <QVariantList>
 
 #include "defines.h"
+#include "ui_editaccountdialog.h"
 
 
-class AccountsModel : public QAbstractTableModel
+class EditAccountDialog : public QDialog, protected Ui::EditAccountDialog
 {
     Q_OBJECT
 
     public:
-        AccountsModel( QSqlDatabase database );
-        ~AccountsModel() {}
+        explicit EditAccountDialog( QWidget* parent = nullptr );
 
-        bool addAccountRecord( const UniMap& fieldsData );
+        void setTypes( QStringList types );
+        void setCurrencies( QStringList currencies );
 
-        int rowCount( const QModelIndex& parent = QModelIndex() ) const override;
-        int columnCount( const QModelIndex& parent = QModelIndex() ) const override;
+        void setValues( const UniMap& fieldsData );
 
-        QVariant data( const QModelIndex& index, int role = Qt::DisplayRole ) const override;
-        QVariant headerData( int section, Qt::Orientation orientation, int role = Qt::DisplayRole ) const override;
-
-        static QStringList getTypes();
-        static QStringList getCurrencies();
+    signals:
+        void saveData( UniMap fieldsData );
 
     protected:
-        QVariantList getRecord( int row ) const;
+        void okClicked();
 
-        QSqlDatabase database;
-
-        QStringList titles;
-        mutable QMap<int,QVariantList> records;
-
-        static QStringList types;
-        static QMap<QString,QVariantList> currencies; // TODO: move to the separate class
+        int recordId = 0;
 };
 
 
-#endif // ACCOUNTS_MODEL_H
+#endif // EDIT_ACCOUNT_DIALOG_H

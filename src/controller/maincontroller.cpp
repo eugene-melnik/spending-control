@@ -61,15 +61,79 @@ void MainController::showAddTransaction()
 
 void MainController::showManageAccounts()
 {
+    AppLogger->funcStart( "MainController::showManageAccounts" );
+
     if( this->accountsListDialog == nullptr )
     {
+        AppLogger->debug( "AccountsListDialogCreation..." );
         this->accountsListDialog = new AccountsListDialog( this->mainWindow );
+
+        this->connect( this->accountsListDialog, &AccountsListDialog::addAccount, this, &MainController::showAddAccount );
+        this->connect( this->accountsListDialog, &AccountsListDialog::editAccount, this, &MainController::showEditAccount );
+        this->connect( this->accountsListDialog, &AccountsListDialog::deleteAccount, this, &MainController::showDeleteAccount );
     }
 
+    // FIXME: only once on creation?
     AccountsModel* accountsModel = new AccountsModel( DatabaseManager::getInstance()->getDatabase() );
-    this->accountsListDialog->setListModel( accountsModel );
+    this->accountsListDialog->setListModel( accountsModel, 1 ); // 1 - "name"
 
     this->accountsListDialog->show();
+    AppLogger->funcDone( "MainController::showManageAccounts" );
+}
+
+
+void MainController::showAddAccount()
+{
+    AppLogger->funcStart( "MainController::showAddAccount" );
+
+    if( this->addAccountDialog == nullptr )
+    {
+        AppLogger->debug( "AddAccountDialog creation.." );
+
+        this->addAccountDialog = new AddAccountDialog( this->accountsListDialog );
+        this->addAccountDialog->setTypes( AccountsModel::getTypes() );
+        this->addAccountDialog->setCurrencies( AccountsModel::getCurrencies() );
+
+        this->connect( this->addAccountDialog, &AddAccountDialog::saveData, this, &MainController::addAccount );
+    }
+
+    this->addAccountDialog->show();
+    AppLogger->funcDone( "MainController::showAddAccount" );
+}
+
+
+void MainController::addAccount( const UniMap& fieldsData )
+{
+    AppLogger->funcStart( "MainController::addAccount", fieldsData );
+
+    AccountsModel* accountsModel = this->accountsListDialog->getListModel();
+    accountsModel->addAccountRecord( fieldsData );
+
+    AppLogger->funcDone( "MainController::addAccount" );
+}
+
+
+void MainController::showEditAccount()
+{
+    //
+}
+
+
+void MainController::updateAccount( const UniMap& fieldsData )
+{
+    //
+}
+
+
+void MainController::showDeleteAccount()
+{
+    //
+}
+
+
+void MainController::deleteAccount( int recordId )
+{
+    //
 }
 
 
@@ -216,9 +280,9 @@ void MainController::connectSignals()
 {
     AppLogger->debug( "MainController::connectSignals()" );
 
-    this->connect( this->mainWindow, SIGNAL(addTransaction()), this, SLOT(showAddTransaction()) );
-    this->connect( this->mainWindow, SIGNAL(manageAccounts()), this, SLOT(showManageAccounts()) );
-    this->connect( this->mainWindow, SIGNAL(manageCategories()), this, SLOT(showManageCategories()) );
+    this->connect( this->mainWindow, &MainWindow::addTransaction, this, &MainController::showAddTransaction );
+    this->connect( this->mainWindow, &MainWindow::manageAccounts, this, &MainController::showManageAccounts );
+    this->connect( this->mainWindow, &MainWindow::manageCategories, this, &MainController::showManageCategories );
 
-    this->connect( this->mainWindow, SIGNAL(aboutToClose()), this, SLOT(exit()) );
+    this->connect( this->mainWindow, &MainWindow::aboutToClose, this, &MainController::exit );
 }

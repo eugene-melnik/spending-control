@@ -22,6 +22,7 @@
 #define MAIN_CONTROLLER_H
 
 #include "window/accountslistdialog.h"
+#include "window/addaccountdialog.h"
 #include "window/mainwindow.h"
 
 #include <QApplication>
@@ -40,6 +41,12 @@ class MainController : public QObject
         void showAddTransaction();
 
         void showManageAccounts();
+        void showAddAccount();
+        void addAccount( const UniMap& fieldsData );
+        void showEditAccount();
+        void updateAccount( const UniMap& fieldsData );
+        void showDeleteAccount();
+        void deleteAccount( int recordId );
 
         void showManageCategories();
 
@@ -54,8 +61,10 @@ class MainController : public QObject
         void createDialogs();
         void connectSignals();
 
-        AccountsListDialog* accountsListDialog = nullptr;
         MainWindow* mainWindow = nullptr;
+
+        AccountsListDialog* accountsListDialog = nullptr;
+        AddAccountDialog* addAccountDialog = nullptr;
 };
 
 

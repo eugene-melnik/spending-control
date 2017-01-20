@@ -1,6 +1,6 @@
 /*************************************************************************************************
  *                                                                                                *
- *  file: accountsmodel.h                                                                         *
+ *  file: editaccountdialog.cpp                                                                   *
  *                                                                                                *
  *  SpendingControl                                                                               *
  *  Copyright (C) 2017 Eugene Melnik <jeka7js@gmail.com>                                          *
@@ -18,48 +18,54 @@
  *                                                                                                *
   *************************************************************************************************/
 
-#ifndef ACCOUNTS_MODEL_H
-#define ACCOUNTS_MODEL_H
-
-#include <QAbstractTableModel>
-#include <QMap>
-#include <QStringList>
-#include <QSqlDatabase>
-#include <QVariantList>
-
-#include "defines.h"
+#include "editaccountdialog.h"
 
 
-class AccountsModel : public QAbstractTableModel
+EditAccountDialog::EditAccountDialog( QWidget* parent )
+  : QDialog( parent )
 {
-    Q_OBJECT
-
-    public:
-        AccountsModel( QSqlDatabase database );
-        ~AccountsModel() {}
-
-        bool addAccountRecord( const UniMap& fieldsData );
-
-        int rowCount( const QModelIndex& parent = QModelIndex() ) const override;
-        int columnCount( const QModelIndex& parent = QModelIndex() ) const override;
-
-        QVariant data( const QModelIndex& index, int role = Qt::DisplayRole ) const override;
-        QVariant headerData( int section, Qt::Orientation orientation, int role = Qt::DisplayRole ) const override;
-
-        static QStringList getTypes();
-        static QStringList getCurrencies();
-
-    protected:
-        QVariantList getRecord( int row ) const;
-
-        QSqlDatabase database;
-
-        QStringList titles;
-        mutable QMap<int,QVariantList> records;
-
-        static QStringList types;
-        static QMap<QString,QVariantList> currencies; // TODO: move to the separate class
-};
+    this->setupUi( this );
+    this->connect( this->bOk, &QPushButton::clicked, this, &EditAccountDialog::okClicked );
+}
 
 
-#endif // ACCOUNTS_MODEL_H
+void EditAccountDialog::setTypes( QStringList types )
+{
+    this->cbType->clear();
+    this->cbType->addItems( types );
+}
+
+
+void EditAccountDialog::setCurrencies( QStringList currencies )
+{
+    this->cbCurrency->clear();
+    this->cbCurrency->addItems( currencies );
+}
+
+
+void EditAccountDialog::setValues( const UniMap& fieldsData )
+{
+    this->recordId = fieldsData.value( "id" ).toInt();
+
+    this->eName->setText( fieldsData.value( "name" ).toString() );
+    this->eDescription->setText( fieldsData.value( "description" ).toString() );
+    this->cbType->setCurrentIndex( fieldsData.value( "type" ).toInt() );
+    this->sbInitialBalance->setValue( (double) fieldsData.value( "initial_balance" ).toInt() / 100.0 );
+    this->sbMinimalBalance->setValue( (double) fieldsData.value( "minimal_balance" ).toInt() / 100.0 );
+}
+
+
+void EditAccountDialog::okClicked()
+{
+    UniMap fieldsData = {
+        { "name",           this->eName->text() },
+        { "description",    this->eDescription->toPlainText() },
+        { "type",           this->cbType->currentIndex() },
+        { "initial_balance", this->sbInitialBalance->value() },
+        { "minimal_balance", this->sbMinimalBalance->value() }
+    };
+
+    emit this->saveData( fieldsData );
+
+    this->accept();
+}
