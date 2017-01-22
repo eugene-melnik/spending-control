@@ -29,6 +29,7 @@
 
 #include <cstdio>
 #include <QFileInfo>
+#include <QMessageBox>
 #include <QProcessEnvironment>
 
 
@@ -65,19 +66,20 @@ void MainController::showManageAccounts()
 
     if( this->accountsListDialog == nullptr )
     {
-        AppLogger->debug( "AccountsListDialogCreation..." );
+        AppLogger->debug( "AccountsListDialog creation..." );
+
         this->accountsListDialog = new AccountsListDialog( this->mainWindow );
+
+        AccountsModel* accountsModel = new AccountsModel( DatabaseManager::getInstance()->getDatabase() );
+        this->accountsListDialog->setListModel( accountsModel, 1 ); // 1 - "name"
 
         this->connect( this->accountsListDialog, &AccountsListDialog::addAccount, this, &MainController::showAddAccount );
         this->connect( this->accountsListDialog, &AccountsListDialog::editAccount, this, &MainController::showEditAccount );
         this->connect( this->accountsListDialog, &AccountsListDialog::deleteAccount, this, &MainController::showDeleteAccount );
     }
 
-    // FIXME: only once on creation?
-    AccountsModel* accountsModel = new AccountsModel( DatabaseManager::getInstance()->getDatabase() );
-    this->accountsListDialog->setListModel( accountsModel, 1 ); // 1 - "name"
-
     this->accountsListDialog->show();
+
     AppLogger->funcDone( "MainController::showManageAccounts" );
 }
 
@@ -94,46 +96,105 @@ void MainController::showAddAccount()
         this->addAccountDialog->setTypes( AccountsModel::getTypes() );
         this->addAccountDialog->setCurrencies( AccountsModel::getCurrencies() );
 
-        this->connect( this->addAccountDialog, &AddAccountDialog::saveData, this, &MainController::addAccount );
+        this->connect( this->addAccountDialog, &AddAccountDialog::saveData, this, &MainController::addOrUpdateAccount );
     }
 
     this->addAccountDialog->show();
+
     AppLogger->funcDone( "MainController::showAddAccount" );
 }
 
 
-void MainController::addAccount( const UniMap& fieldsData )
+void MainController::addOrUpdateAccount( const UniMap& fieldsData )
 {
-    AppLogger->funcStart( "MainController::addAccount", fieldsData );
+    AppLogger->funcStart( "MainController::addOrUpdateAccount", fieldsData );
 
     AccountsModel* accountsModel = this->accountsListDialog->getListModel();
-    accountsModel->addAccountRecord( fieldsData );
+    bool ok;
 
-    AppLogger->funcDone( "MainController::addAccount" );
+    if( fieldsData.value( "id", 0 ).toInt() == 0 )
+    {
+        ok = accountsModel->addAccountRecord( fieldsData );
+    }
+    else
+    {
+        ok = accountsModel->updateAccountRecord( fieldsData );
+    }
+
+    if( !ok )
+    {
+        QMessageBox::warning(
+            this->mainWindow,
+            tr( "Save account data" ),
+            tr( "Internal error occurred, please see log file for details." )
+        );
+    }
+
+    AppLogger->funcDone( "MainController::addOrUpdateAccount" );
 }
 
 
 void MainController::showEditAccount()
 {
-    //
-}
+    AppLogger->funcStart( "MainController::showEditAccount" );
 
+    if( this->editAccountDialog == nullptr )
+    {
+        AppLogger->debug( "EditAccountDialog creation..." );
 
-void MainController::updateAccount( const UniMap& fieldsData )
-{
-    //
+        this->editAccountDialog = new EditAccountDialog( this->accountsListDialog );
+        this->editAccountDialog->setTypes( AccountsModel::getTypes() );
+        this->editAccountDialog->setCurrencies( AccountsModel::getCurrencies() );
+
+        this->connect( this->editAccountDialog, &EditAccountDialog::saveData, this, &MainController::addOrUpdateAccount );
+    }
+
+    AccountsModel* accountsModel = this->accountsListDialog->getListModel();
+    int selectedRow = this->accountsListDialog->getSelectedRow();
+    this->editAccountDialog->setValues( accountsModel->getRecordsMapped( selectedRow ) );
+    this->editAccountDialog->show();
+
+    AppLogger->funcDone( "MainController::showEditAccount" );
 }
 
 
 void MainController::showDeleteAccount()
 {
-    //
-}
+    AppLogger->funcStart( "MainController::showDeleteAccount" );
 
+    QVariantList recordData = this->accountsListDialog->getSelectedRecord();
+    QString accountName = recordData.at( 1 ).toString();
 
-void MainController::deleteAccount( int recordId )
-{
-    //
+    int button = QMessageBox::question(
+        this->mainWindow,
+        tr( "Delete account" ),
+        tr( "Are you sure you want to delete selected account (\"%1\")?" ).arg( accountName )
+    );
+
+    if( button == QMessageBox::Yes )
+    {
+        int accountId = recordData.at( 0 ).toInt();
+        bool deleted = this->accountsListDialog->getListModel()->deleteOrCloseAccountRecord( accountId );
+
+        if( deleted )
+        {
+            QMessageBox::information(
+                this->mainWindow,
+                tr( "Delete account" ),
+                tr( "Account \"%1\" successfully deleted!" ).arg( accountName )
+            );
+        }
+        else
+        {
+            QMessageBox::warning(
+                this->mainWindow,
+                tr( "Delete account" ),
+                tr( "Internal error occurred, please see log file for details." )
+            );
+        }
+    }
+
+    AppLogger->funcDone( "MainController::showDeleteAccount" );
 }
 
 

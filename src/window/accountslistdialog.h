@@ -38,10 +38,16 @@ class AccountsListDialog : public QDialog, protected Ui::AccountsListDialog
 
         AccountsModel* getListModel() const;
 
+        int getSelectedRow() const;
+        QVariantList getSelectedRecord() const;
+
     signals:
         void addAccount();
         void editAccount();
         void deleteAccount();
+
+    protected slots:
+        void accountSelected( const QModelIndex& index );
 
     protected:
         AccountsModel* listModel = nullptr;

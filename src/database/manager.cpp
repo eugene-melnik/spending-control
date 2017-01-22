@@ -99,6 +99,19 @@ void DatabaseManager::clearInstance()
 }
 
 
+QString DatabaseManager::getLastErrorText()
+{
+    if( DatabaseManager::instance != nullptr )
+    {
+        return( DatabaseManager::instance->getDatabase().lastError().text() );
+    }
+    else
+    {
+        return( "" );
+    }
+}
+
+
 QSqlDatabase& DatabaseManager::getDatabase()
 {
     return( this->database );

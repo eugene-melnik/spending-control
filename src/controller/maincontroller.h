@@ -42,11 +42,9 @@ class MainController : public QObject
 
         void showManageAccounts();
         void showAddAccount();
-        void addAccount( const UniMap& fieldsData );
+        void addOrUpdateAccount( const UniMap& fieldsData );
         void showEditAccount();
-        void updateAccount( const UniMap& fieldsData );
         void showDeleteAccount();
-        void deleteAccount( int recordId );
 
         void showManageCategories();
 
@@ -65,6 +63,7 @@ class MainController : public QObject
 
         AccountsListDialog* accountsListDialog = nullptr;
         AddAccountDialog* addAccountDialog = nullptr;
+        EditAccountDialog* editAccountDialog = nullptr;
 };
 
 

@@ -27,7 +27,7 @@
 #include <QSqlDatabase>
 #include <QVariantList>
 
-#include "defines.h"
+#include "types.h"
 
 
 class AccountsModel : public QAbstractTableModel
@@ -39,6 +39,10 @@ class AccountsModel : public QAbstractTableModel
         ~AccountsModel() {}
 
         bool addAccountRecord( const UniMap& fieldsData );
+        bool updateAccountRecord( const UniMap& fieldsData );
+        bool deleteOrCloseAccountRecord( int accountId );
+        bool deleteAccountRecord( int accountId );
+        bool closeAccountRecord( int accountId );
 
         int rowCount( const QModelIndex& parent = QModelIndex() ) const override;
         int columnCount( const QModelIndex& parent = QModelIndex() ) const override;
@@ -46,12 +50,13 @@ class AccountsModel : public QAbstractTableModel
         QVariant data( const QModelIndex& index, int role = Qt::DisplayRole ) const override;
         QVariant headerData( int section, Qt::Orientation orientation, int role = Qt::DisplayRole ) const override;
 
+        QVariantList getRecord( int row ) const;
+        UniMap getRecordsMapped( int row ) const;
+
         static QStringList getTypes();
         static QStringList getCurrencies();
 
     protected:
-        QVariantList getRecord( int row ) const;
-
         QSqlDatabase database;
 
         QStringList titles;

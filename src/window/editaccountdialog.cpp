@@ -20,6 +20,8 @@
 
 #include "editaccountdialog.h"
 
+#include <QMessageBox>
+
 
 EditAccountDialog::EditAccountDialog( QWidget* parent )
   : QDialog( parent )
@@ -50,6 +52,7 @@ void EditAccountDialog::setValues( const UniMap& fieldsData )
     this->eName->setText( fieldsData.value( "name" ).toString() );
     this->eDescription->setText( fieldsData.value( "description" ).toString() );
     this->cbType->setCurrentIndex( fieldsData.value( "type" ).toInt() );
+    this->cbCurrency->setCurrentIndex( fieldsData.value( "currency" ).toInt() );
     this->sbInitialBalance->setValue( (double) fieldsData.value( "initial_balance" ).toInt() / 100.0 );
     this->sbMinimalBalance->setValue( (double) fieldsData.value( "minimal_balance" ).toInt() / 100.0 );
 }
@@ -57,10 +60,23 @@ void EditAccountDialog::setValues( const UniMap& fieldsData )
 
 void EditAccountDialog::okClicked()
 {
+    if( this->eName->text().isEmpty() )
+    {
+        QMessageBox::information(
+            this,
+            tr( "Save account data" ),
+            tr( "Field \"Name\" is required!" )
+        );
+
+        return;
+    }
+
     UniMap fieldsData = {
+        { "id",             this->recordId },
         { "name",           this->eName->text() },
         { "description",    this->eDescription->toPlainText() },
         { "type",           this->cbType->currentIndex() },
+        { "currency",       this->cbCurrency->currentIndex() },
         { "initial_balance", this->sbInitialBalance->value() },
         { "minimal_balance", this->sbMinimalBalance->value() }
     };

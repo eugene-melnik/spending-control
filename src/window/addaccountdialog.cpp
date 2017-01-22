@@ -34,6 +34,7 @@ void AddAccountDialog::showEvent( QShowEvent* event )
     this->eName->clear();
     this->eDescription->clear();
     this->cbType->setCurrentIndex( 0 );
+    this->cbCurrency->setCurrentIndex( 0 );
     this->sbInitialBalance->setValue( 0.0 );
     this->sbMinimalBalance->setValue( 0.0 );
 

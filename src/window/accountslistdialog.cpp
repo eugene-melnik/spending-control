@@ -29,6 +29,8 @@ AccountsListDialog::AccountsListDialog( QWidget* parent )
     this->connect( this->bAdd, &QPushButton::clicked, this, &AccountsListDialog::addAccount );
     this->connect( this->bEdit, &QPushButton::clicked, this, &AccountsListDialog::editAccount );
     this->connect( this->bDelete, &QPushButton::clicked, this, &AccountsListDialog::deleteAccount );
+
+    this->connect( this->lvAccounts, &QListView::clicked, this, &AccountsListDialog::accountSelected );
 }
 
 
@@ -48,4 +50,25 @@ void AccountsListDialog::setListModel( AccountsModel* model, int modelColumn )
 AccountsModel* AccountsListDialog::getListModel() const
 {
     return( this->listModel );
+}
+
+
+int AccountsListDialog::getSelectedRow() const
+{
+    return( this->lvAccounts->selectionModel()->currentIndex().row() );
+}
+
+
+QVariantList AccountsListDialog::getSelectedRecord() const
+{
+    return( this->listModel->getRecord( this->getSelectedRow() ) );
+}
+
+
+void AccountsListDialog::accountSelected( const QModelIndex& index )
+{
+    bool isValid = index.isValid();
+
+    this->bEdit->setEnabled( isValid );
+    this->bDelete->setEnabled( isValid );
 }

@@ -138,8 +138,7 @@ void DatabaseMigration::setupMigrations()
                 `initial_balance`   INTEGER DEFAULT '0', \
                 `minimal_balance`   INTEGER DEFAULT '0', \
                 `created_at`        TEXT, \
-                `closed_at`         TEXT, \
-                `deleted_at`        TEXT \
+                `closed_at`         TEXT \
             );",
             "CREATE INDEX accounts_name_idx ON accounts(name);",
             "CREATE INDEX accounts_type_idx ON accounts(type);",
@@ -174,6 +173,26 @@ void DatabaseMigration::setupMigrations()
             "CREATE INDEX transactions_type_idx ON transactions(type);",
             "CREATE INDEX transactions_date_idx ON transactions(date);",
             "CREATE INDEX transactions_category_id_idx ON transactions(category_id);"
+        }
+    );
+
+    /*
+     * Initial version of table 'transaction_items'.
+     */
+    this->migrationsList.insert(
+        3,
+        {
+            "CREATE TABLE `transaction_items` ( \
+                `id`                INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, \
+                `transaction_id`    INTEGER NOT NULL, \
+                `name`              TEXT NOT NULL, \
+                `amount`            INTEGER NOT NULL DEFAULT '0', \
+                `category_id`       INTEGER NOT NULL, \
+                FOREIGN KEY (transaction_id) REFERENCES transactions(id), \
+                FOREIGN KEY (category_id) REFERENCES categories(id) \
+            );",
+            "CREATE INDEX transaction_items_transaction_id_idx ON transaction_items(transaction_id);"
+            "CREATE INDEX transaction_items_category_id_idx ON transaction_items(category_id);"
         }
     );
 }

@@ -56,6 +56,8 @@ class DatabaseManager
          */
         static void clearInstance();
 
+        static QString getLastErrorText();
+
         enum Driver
         {
             QDB2,
