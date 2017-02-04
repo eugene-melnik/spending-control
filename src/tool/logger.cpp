@@ -59,7 +59,7 @@ QString Logger::timeFormat = "yyyy-MM-dd hh:mm:ss.zzz";
 Logger* Logger::instance = nullptr;
 
 
-void Logger::log( const QString& message, Logger::Level level )
+void Logger::log( const QString& message, const UniMap& values, Logger::Level level )
 {
     if( level >= Logger::minLevel )
     {
@@ -72,7 +72,7 @@ void Logger::log( const QString& message, Logger::Level level )
             this->write( QString( "[%1] -- %2 -- %3\n" ).arg(
                 this->getTimestamp(),
                 this->getLevelString( level ),
-                message
+                message + ( values.isEmpty() ? "" : " -- " + this->formatValues( values ) )
             ) );
         }
     }
@@ -81,25 +81,18 @@ void Logger::log( const QString& message, Logger::Level level )
 
 void Logger::funcStart( const QString& funcName, UniMap arguments )
 {
-    QString message = funcName + "( ";
-
-    for( const QString& key : arguments.keys() )
-    {
-        message += key + "='" + arguments.value(key).toString() + "' ";
-    }
-
-    message += ")";
+    QString message = QString( "%1(%2)" ).arg( funcName, this->formatValues( arguments ) );
 
     QTime startTime;
     startTime.start();
 
     this->functionTimers.insert( funcName, startTime );
 
-    this->log( "Starting: " + message, Level::DEBUG );
+    this->log( "Starting: " + message, UniMap(), Level::DEBUG );
 }
 
 
-void Logger::funcDone( const QString& funcName )
+void Logger::funcDone( const QString& funcName, UniMap arguments )
 {
     int timeElapsed = this->functionTimers.value( funcName ).elapsed();
     QString timeUnit = "ms";
@@ -111,10 +104,10 @@ void Logger::funcDone( const QString& funcName )
     }
 
     this->log( QString( "Done: %1 in %2 %3" ).arg(
-        funcName,
+        funcName + ( arguments.isEmpty() ? "" : "(" + this->formatValues( arguments ) + ")"),
         QString::number( timeElapsed ),
         timeUnit
-    ), Level::DEBUG );
+    ), UniMap(), Level::DEBUG );
 
     this->functionTimers.remove( funcName );
 }
@@ -194,6 +187,25 @@ Logger* Logger::getInstance()
 QString Logger::getTimestamp() const
 {
     return( QDateTime::currentDateTime().toString( Logger::timeFormat ) );
+}
+
+
+QString Logger::formatValues( const UniMap& values, bool withNewLines )
+{
+    // TODO: add support of subarrays etc.
+
+    QString result;
+
+    for( const QString& key : values.keys() )
+    {
+        result += QString( "%1='%2'%3" ).arg(
+            key,
+            values.value( key ).toString(),
+            withNewLines ? "\n" : " "
+        );
+    }
+
+    return( result );
 }
 
 

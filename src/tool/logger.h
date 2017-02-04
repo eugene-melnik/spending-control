@@ -43,13 +43,28 @@ class Logger
         /*!
          *
          */
-        void log( const QString& message, Level level);
+        void log( const QString& message, const UniMap& values, Level level);
 
-        void debug( const QString& message ) { this->log( message, Level::DEBUG ); }
-        void info( const QString& message ) { this->log( message, Level::INFO ); }
-        void warn( const QString& message ) { this->log( message, Level::WARN ); }
-        void error( const QString& message ) { this->log( message, Level::ERROR ); }
-        void crit( const QString& message ) { this->log( message, Level::CRIT ); }
+        void debug( const QString& message, const UniMap& values = UniMap() )
+        {
+            this->log( message, values, Level::DEBUG );
+        }
+        void info( const QString& message, const UniMap& values = UniMap() )
+        {
+            this->log( message, values, Level::INFO );
+        }
+        void warn( const QString& message, const UniMap& values = UniMap() )
+        {
+            this->log( message, values, Level::WARN );
+        }
+        void error( const QString& message, const UniMap& values = UniMap() )
+        {
+            this->log( message, values, Level::ERROR );
+        }
+        void crit( const QString& message, const UniMap& values = UniMap() )
+        {
+            this->log( message, values, Level::CRIT );
+        }
 
         /*!
          *
@@ -59,7 +74,7 @@ class Logger
         /*!
          *
          */
-        void funcDone( const QString& funcName );
+        void funcDone( const QString& funcName, UniMap arguments = UniMap() );
 
         static bool setMinLevel( Level minLevel );
         static bool setMinLevelStr( const QString& levelStr );
@@ -78,6 +93,7 @@ class Logger
         ~Logger() = delete;
 
         QString getTimestamp() const;
+        QString formatValues( const UniMap& values, bool withNewLines = false );
         QString getLevelString( Level level ) const;
 
         void write( const QString& string );
