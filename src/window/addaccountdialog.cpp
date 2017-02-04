@@ -22,6 +22,7 @@
 
 
 AddAccountDialog::AddAccountDialog( QWidget* parent )
+  : EditAccountDialog( parent )
 {
     this->setWindowTitle( tr( "Add account" ) );
 }

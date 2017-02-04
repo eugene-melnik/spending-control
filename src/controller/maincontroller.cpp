@@ -20,7 +20,6 @@
 
 #include "database/manager.h"
 #include "database/migration.h"
-#include "model/accountsmodel.h"
 #include "tool/commandlineparser.h"
 #include "tool/settings.h"
 #include "defines.h"
@@ -150,9 +149,7 @@ void MainController::showManageAccounts()
         AppLogger->debug( "AccountsListDialog creation..." );
 
         this->accountsListDialog = new AccountsListDialog( this->mainWindow );
-
-        AccountsModel* accountsModel = new AccountsModel( DatabaseManager::getInstance()->getDatabase() );
-        this->accountsListDialog->setListModel( accountsModel, 1 ); // 1 - "name"
+        this->accountsListDialog->setListModel( this->getAccountsModel(), 1 ); // 1 -- "name" column
 
         this->connect( this->accountsListDialog, &AccountsListDialog::addAccount, this, &MainController::showAddAccount );
         this->connect( this->accountsListDialog, &AccountsListDialog::editAccount, this, &MainController::showEditAccount );
@@ -190,16 +187,16 @@ void MainController::addOrUpdateAccount( const UniMap& fieldsData )
 {
     AppLogger->funcStart( "MainController::addOrUpdateAccount", fieldsData );
 
-    AccountsModel* accountsModel = this->accountsListDialog->getListModel();
+    AccountsModel* accountsModel = this->getAccountsModel();
     bool ok;
 
-    if( fieldsData.value( "id", 0 ).toInt() == 0 )
+    if( fieldsData.value( "id" ).toInt() == 0 )
     {
-        ok = accountsModel->addAccountRecord( fieldsData );
+        ok = accountsModel->addRecord( fieldsData );
     }
     else
     {
-        ok = accountsModel->updateAccountRecord( fieldsData );
+        ok = accountsModel->updateRecord( fieldsData );
     }
 
     if( !ok )
@@ -230,9 +227,8 @@ void MainController::showEditAccount()
         this->connect( this->editAccountDialog, &EditAccountDialog::saveData, this, &MainController::addOrUpdateAccount );
     }
 
-    AccountsModel* accountsModel = this->accountsListDialog->getListModel();
     int selectedRow = this->accountsListDialog->getSelectedRow();
-    this->editAccountDialog->setValues( accountsModel->getRecordsMapped( selectedRow ) );
+    this->editAccountDialog->setValues( this->getAccountsModel()->getRecordsMapped( selectedRow ) );
     this->editAccountDialog->show();
 
     AppLogger->funcDone( "MainController::showEditAccount" );
@@ -255,7 +251,7 @@ void MainController::showDeleteAccount()
     if( button == QMessageBox::Yes )
     {
         int accountId = recordData.at( 0 ).toInt();
-        bool deleted = this->accountsListDialog->getListModel()->deleteOrCloseAccountRecord( accountId );
+        bool deleted = this->getAccountsModel()->deleteOrCloseAccount( accountId );
 
         if( deleted )
         {

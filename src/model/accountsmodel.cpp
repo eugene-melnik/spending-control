@@ -23,6 +23,17 @@
 #include "defines.h"
 
 
+QStringList AccountsModel::titles = {
+    tr( "ID" ),
+    tr( "Name" ),
+    tr( "Description" ),
+    tr( "Type" ),
+    tr( "Currency" ),
+    tr( "Initial balance" ),
+    tr( "Minimal balance" ),
+    tr( "Closed at" )
+};
+
 QStringList AccountsModel::types = {
     QObject::tr( "<no type>" ),
     QObject::tr( "Bank" ),
@@ -31,36 +42,38 @@ QStringList AccountsModel::types = {
 };
 
 QMap<QString,QVariantList> AccountsModel::currencies = {
-    // ISO Code, Territory,     Currency,               Symbol, Fractional unit,    Number to basic
-    { "UAH", { "Ukraine",       "Ukrainian hryvnia",    "₴",    "Kopiyka",          100 } },
-    { "USD", { "United States", "United States dollar", "$",    "Cent",             100 } }
+    // ISO Code, Territory,         Currency,                   Symbol, Fractional unit, Number to basic
+    { "-NONE-", { "",               "",                         "",     "",               1 } },
+    { "AUD", { "Australia",         "Australian dollar",        "$",    "Cent",         100 } },
+    { "BGN", { "Bulgaria",          "Bulgarian lev",            "лв",   "Stotinka",     100 } },
+    { "BYN", { "Australia",         "New Belarusian ruble",     "Br",   "Kapyeyka",     100 } },
+    { "CAD", { "Canada",            "Canadian dollar",          "$",    "Cent",         100 } },
+    { "CLP", { "Chile",             "Chilean peso",             "$",    "Centavo",      100 } },
+    { "CNY", { "China",             "Chinese yuan",             "¥",    "Fen",          100 } },
+    { "CZK", { "Czech Republic",    "Czech koruna",             "Kč",   "Haléř",        100 } },
+    { "DKK", { "Denmark",           "Danish krone",             "kr",   "Øre",          100 } },
+    { "EUR", { "EU",                "Euro",                     "€",    "Cent",         100 } },
+    { "UAH", { "Ukraine",           "Ukrainian hryvnia",        "₴",    "Kopiyka",      100 } },
+    { "USD", { "United States",     "United States dollar",     "$",    "Cent",         100 } }
 };
 
 
 AccountsModel::AccountsModel( QSqlDatabase database )
   : database( database )
 {
-    this->titles = {
-        tr( "ID"),
-        tr( "Name" ),
-        tr( "Description" ),
-        tr( "Type" ),
-        tr( "Currency" ),
-        tr( "Initial balance" ),
-        tr( "Minimal balance" ),
-        tr( "Closed at" )
-    };
+    //
 }
 
 
-bool AccountsModel::addAccountRecord( const UniMap& fieldsData )
+bool AccountsModel::addRecord( const UniMap& fieldsData )
 {
     this->beginResetModel();
 
     DatabaseQuery query( this->database );
 
     query.prepare(
-        "INSERT INTO accounts (name, description, type, currency, initial_balance, minimal_balance, created_at) \
+        "INSERT INTO accounts \
+            (name, description, type, currency, initial_balance, minimal_balance, created_at) \
         VALUES (?, ?, ?, ?, ?, ?, ?);"
     );
 
@@ -68,8 +81,8 @@ bool AccountsModel::addAccountRecord( const UniMap& fieldsData )
     query.bindValue( 1, fieldsData.value( "description" ) );
     query.bindValue( 2, fieldsData.value( "type" ) );
     query.bindValue( 3, fieldsData.value( "currency" ) );
-    query.bindValue( 4, (int) fieldsData.value( "initial_balance" ).toDouble() * 100 );
-    query.bindValue( 5, (int) fieldsData.value( "minimal_balance" ).toDouble() * 100 );
+    query.bindValue( 4, (int) (fieldsData.value( "initial_balance" ).toDouble() * 100) );
+    query.bindValue( 5, (int) (fieldsData.value( "minimal_balance" ).toDouble() * 100) );
     query.bindValue( 6, QDateTime::currentDateTime().toString( Qt::ISODate ) );
 
     bool ok = query.exec();
@@ -86,14 +99,15 @@ bool AccountsModel::addAccountRecord( const UniMap& fieldsData )
 }
 
 
-bool AccountsModel::updateAccountRecord( const UniMap& fieldsData )
+bool AccountsModel::updateRecord( const UniMap& fieldsData )
 {
     this->beginResetModel();
 
     DatabaseQuery query( this->database );
 
     query.prepare(
-        "UPDATE accounts SET name = ?, description = ?, type = ?, currency = ?, initial_balance = ?, minimal_balance = ? \
+        "UPDATE accounts \
+            SET name = ?, description = ?, type = ?, currency = ?, initial_balance = ?, minimal_balance = ? \
         WHERE id = ?;"
     );
 
@@ -101,8 +115,8 @@ bool AccountsModel::updateAccountRecord( const UniMap& fieldsData )
     query.bindValue( 1, fieldsData.value( "description" ) );
     query.bindValue( 2, fieldsData.value( "type" ) );
     query.bindValue( 3, fieldsData.value( "currency" ) );
-    query.bindValue( 4, (int) fieldsData.value( "initial_balance" ).toDouble() * 100 );
-    query.bindValue( 5, (int) fieldsData.value( "minimal_balance" ).toDouble() * 100 );
+    query.bindValue( 4, (int) (fieldsData.value( "initial_balance" ).toDouble() * 100) );
+    query.bindValue( 5, (int) (fieldsData.value( "minimal_balance" ).toDouble() * 100) );
     query.bindValue( 6, fieldsData.value( "id" ).toInt() );
 
     bool ok = query.exec();
@@ -119,30 +133,7 @@ bool AccountsModel::updateAccountRecord( const UniMap& fieldsData )
 }
 
 
-bool AccountsModel::deleteOrCloseAccountRecord( int accountId )
-{
-    DatabaseQuery query( this->database );
-
-    query.prepare(
-        "SELECT COUNT(*) FROM transactions \
-        WHERE source_account_id = ? OR destination_account_id = ?;"
-    );
-
-    query.bindValue( 0, accountId );
-    query.bindValue( 1, accountId );
-
-    if( query.exec() && query.first() && query.value( 0 ).toInt() > 0 )
-    {
-        return( this->closeAccountRecord( accountId ) );
-    }
-    else
-    {
-        return( this->deleteAccountRecord( accountId ) );
-    }
-}
-
-
-bool AccountsModel::deleteAccountRecord( int accountId )
+bool AccountsModel::deleteRecord( int accountId )
 {
     this->beginResetModel();
 
@@ -164,7 +155,29 @@ bool AccountsModel::deleteAccountRecord( int accountId )
 }
 
 
-bool AccountsModel::closeAccountRecord( int accountId )
+bool AccountsModel::deleteOrCloseAccount( int accountId )
+{
+    DatabaseQuery query( this->database );
+
+    query.prepare(
+        "SELECT COUNT(*) FROM transactions WHERE source_account_id = ? OR destination_account_id = ?;"
+    );
+
+    query.bindValue( 0, accountId );
+    query.bindValue( 1, accountId );
+
+    if( query.exec() && query.first() && query.value( 0 ).toInt() > 0 )
+    {
+        return( this->closeAccount( accountId ) );
+    }
+    else
+    {
+        return( this->deleteRecord( accountId ) );
+    }
+}
+
+
+bool AccountsModel::closeAccount( int accountId )
 {
     this->beginResetModel();
 
@@ -190,9 +203,7 @@ bool AccountsModel::closeAccountRecord( int accountId )
 int AccountsModel::rowCount( const QModelIndex& ) const
 {
     QSqlQuery query = this->database.exec(
-        "SELECT COUNT(*) AS accounts_count \
-        FROM accounts \
-        WHERE closed_at IS NULL;"
+        "SELECT COUNT(*) AS accounts_count FROM accounts WHERE closed_at IS NULL;"
     );
 
     if( query.first() )
@@ -208,17 +219,20 @@ int AccountsModel::rowCount( const QModelIndex& ) const
 
 int AccountsModel::columnCount( const QModelIndex& ) const
 {
-    return( this->titles.count() );
+    return( AccountsModel::titles.count() );
 }
 
 
 QVariant AccountsModel::data( const QModelIndex& index, int role ) const
 {
+    int row = index.row();
+    int column = index.column();
+
     switch( role )
     {
         case Qt::DisplayRole :
         {
-            return( this->getRecord( index.row() ).at( index.column() ) );
+            return( this->getRecord( row ).at( column ) );
         }
     }
 
@@ -235,7 +249,7 @@ QVariant AccountsModel::headerData( int section, Qt::Orientation orientation, in
             case Qt::DisplayRole :
             case Qt::ToolTipRole :
             {
-                return( this->titles.at( section ) );
+                return( AccountsModel::titles.at( section ) );
             }
         }
     }
@@ -252,8 +266,7 @@ QVariantList AccountsModel::getRecord( int row ) const
 
         query.prepare(
             "SELECT id, name, description, type, currency, initial_balance, minimal_balance, closed_at \
-            FROM accounts WHERE closed_at IS NULL \
-            ORDER BY name ASC LIMIT 1 OFFSET ?;"
+            FROM accounts WHERE closed_at IS NULL ORDER BY name ASC LIMIT 1 OFFSET ?;"
         );
 
         query.bindValue( 0, row );
@@ -262,14 +275,14 @@ QVariantList AccountsModel::getRecord( int row ) const
         if( query.first() )
         {
             this->records.insert( row, {
-                query.value( 0 ),
-                query.value( 1 ),
-                query.value( 2 ),
-                query.value( 3 ),
-                query.value( 4 ),
-                query.value( 5 ),
-                query.value( 6 ),
-                query.value( 7 )
+                query.value( Column::Id ),
+                query.value( Column::Name ),
+                query.value( Column::Description ),
+                query.value( Column::Type ),
+                query.value( Column::Currency ),
+                query.value( Column::InitialBalance ),
+                query.value( Column::MinimalBalance ),
+                query.value( Column::ClosedAt )
             } );
         }
         else
@@ -291,14 +304,14 @@ UniMap AccountsModel::getRecordsMapped( int row ) const
     if( !record.isEmpty() )
     {
         result = {
-            { "id",             record.at( 0 ) },
-            { "name",           record.at( 1 ) },
-            { "description",    record.at( 2 ) },
-            { "type",           record.at( 3 ) },
-            { "currency",       record.at( 4 ) },
-            { "initial_balance", record.at( 5 ) },
-            { "minimal_balance", record.at( 6 ) },
-            { "closed_at",      record.at( 7 ) }
+            { "id",             record.at( Column::Id ) },
+            { "name",           record.at( Column::Name ) },
+            { "description",    record.at( Column::Description ) },
+            { "type",           record.at( Column::Type ) },
+            { "currency",       record.at( Column::Currency ) },
+            { "initial_balance", record.at( Column::InitialBalance ) },
+            { "minimal_balance", record.at( Column::MinimalBalance ) },
+            { "closed_at",      record.at( Column::ClosedAt ) }
         };
     }
 

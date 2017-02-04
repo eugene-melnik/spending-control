@@ -26,94 +26,118 @@
    <item>
     <layout class="QHBoxLayout" name="hlContent">
      <item>
-      <layout class="QVBoxLayout" name="vlContent1">
+      <layout class="QVBoxLayout" name="hlContentLeft">
        <item>
-        <widget class="QLabel" name="labelName">
-         <property name="text">
-          <string>Name:</string>
-         </property>
-        </widget>
+        <layout class="QVBoxLayout" name="vlName">
+         <item>
+          <widget class="QLabel" name="labelName">
+           <property name="text">
+            <string>Name:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="eName"/>
+         </item>
+        </layout>
        </item>
        <item>
-        <widget class="QLineEdit" name="eName"/>
-       </item>
-       <item>
-        <widget class="QLabel" name="labelDescription">
-         <property name="text">
-          <string>Description (optional):</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QTextEdit" name="eDescription"/>
+        <layout class="QVBoxLayout" name="vlDescription">
+         <item>
+          <widget class="QLabel" name="labelDescription">
+           <property name="text">
+            <string>Description:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QTextEdit" name="eDescription"/>
+         </item>
+        </layout>
        </item>
       </layout>
      </item>
      <item>
-      <layout class="QVBoxLayout" name="vlContent2">
+      <layout class="QVBoxLayout" name="hlContentRight">
        <item>
-        <widget class="QLabel" name="labelType">
-         <property name="text">
-          <string>Type:</string>
-         </property>
-        </widget>
+        <layout class="QVBoxLayout" name="vlType">
+         <item>
+          <widget class="QLabel" name="labelType">
+           <property name="text">
+            <string>Type:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="cbType">
+           <property name="minimumSize">
+            <size>
+             <width>120</width>
+             <height>0</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </item>
        <item>
-        <widget class="QComboBox" name="cbType">
-         <property name="minimumSize">
-          <size>
-           <width>120</width>
-           <height>0</height>
-          </size>
-         </property>
-        </widget>
+        <layout class="QVBoxLayout" name="vlCurrency">
+         <item>
+          <widget class="QLabel" name="labelCurrency">
+           <property name="text">
+            <string>Currency:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="cbCurrency"/>
+         </item>
+        </layout>
        </item>
        <item>
-        <widget class="QLabel" name="labelCurrency">
-         <property name="text">
-          <string>Currency:</string>
-         </property>
-        </widget>
+        <layout class="QVBoxLayout" name="vlInitialBalance">
+         <item>
+          <widget class="QLabel" name="labelInitialBalance">
+           <property name="text">
+            <string>Initial balance:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QDoubleSpinBox" name="sbInitialBalance">
+           <property name="minimum">
+            <double>-1000000.000000000000000</double>
+           </property>
+           <property name="maximum">
+            <double>1000000.000000000000000</double>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </item>
        <item>
-        <widget class="QComboBox" name="cbCurrency"/>
+        <layout class="QVBoxLayout" name="vlMinimalBalance">
+         <item>
+          <widget class="QLabel" name="labelMinimalBalance">
+           <property name="text">
+            <string>Minimal balance:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QDoubleSpinBox" name="sbMinimalBalance">
+           <property name="minimum">
+            <double>-1000000.000000000000000</double>
+           </property>
+           <property name="maximum">
+            <double>1000000.000000000000000</double>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </item>
        <item>
-        <widget class="QLabel" name="labelInitialBalance">
-         <property name="text">
-          <string>Initial balance:</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QDoubleSpinBox" name="sbInitialBalance">
-         <property name="minimum">
-          <double>-1000000.000000000000000</double>
-         </property>
-         <property name="maximum">
-          <double>1000000.000000000000000</double>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="labelMinimalBalance">
-         <property name="text">
-          <string>Minimal balance:</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QDoubleSpinBox" name="sbMinimalBalance">
-         <property name="minimum">
-          <double>-1000000.000000000000000</double>
-         </property>
-         <property name="maximum">
-          <double>1000000.000000000000000</double>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <spacer name="vsContent2">
+        <spacer name="vsContentRight">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
          </property>
@@ -152,9 +176,9 @@
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="bClose">
+      <widget class="QPushButton" name="bCancel">
        <property name="text">
-        <string>&amp;Close</string>
+        <string>&amp;Cancel</string>
        </property>
       </widget>
      </item>
@@ -172,7 +196,7 @@
  <resources/>
  <connections>
   <connection>
-   <sender>bClose</sender>
+   <sender>bCancel</sender>
    <signal>clicked()</signal>
    <receiver>EditAccountDialog</receiver>
    <slot>reject()</slot>

@@ -22,7 +22,6 @@
 #define ACCOUNTS_MODEL_H
 
 #include <QAbstractTableModel>
-#include <QMap>
 #include <QStringList>
 #include <QSqlDatabase>
 #include <QVariantList>
@@ -36,13 +35,13 @@ class AccountsModel : public QAbstractTableModel
 
     public:
         AccountsModel( QSqlDatabase database );
-        ~AccountsModel() {}
 
-        bool addAccountRecord( const UniMap& fieldsData );
-        bool updateAccountRecord( const UniMap& fieldsData );
-        bool deleteOrCloseAccountRecord( int accountId );
-        bool deleteAccountRecord( int accountId );
-        bool closeAccountRecord( int accountId );
+        bool addRecord( const UniMap& fieldsData );
+        bool updateRecord( const UniMap& fieldsData );
+        bool deleteRecord( int accountId );
+
+        bool deleteOrCloseAccount( int accountId );
+        bool closeAccount( int accountId );
 
         int rowCount( const QModelIndex& parent = QModelIndex() ) const override;
         int columnCount( const QModelIndex& parent = QModelIndex() ) const override;
@@ -53,15 +52,28 @@ class AccountsModel : public QAbstractTableModel
         QVariantList getRecord( int row ) const;
         UniMap getRecordsMapped( int row ) const;
 
+        UniMap getList() const;
+
+        enum Column
+        {
+            Id,
+            Name,
+            Description,
+            Type,
+            Currency,
+            InitialBalance,
+            MinimalBalance,
+            ClosedAt
+        };
+
         static QStringList getTypes();
         static QStringList getCurrencies();
 
     protected:
         QSqlDatabase database;
-
-        QStringList titles;
         mutable QMap<int,QVariantList> records;
 
+        static QStringList titles;
         static QStringList types;
         static QMap<QString,QVariantList> currencies; // TODO: move to the separate class
 };

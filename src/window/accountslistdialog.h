@@ -18,8 +18,8 @@
  *                                                                                                *
   *************************************************************************************************/
 
-#ifndef ACCOUNTSLISTDIALOG_H
-#define ACCOUNTSLISTDIALOG_H
+#ifndef ACCOUNTS_LIST_DIALOG_H
+#define ACCOUNTS_LIST_DIALOG_H
 
 #include <QDialog>
 
@@ -53,4 +53,4 @@ class AccountsListDialog : public QDialog, protected Ui::AccountsListDialog
         AccountsModel* listModel = nullptr;
 };
 
-#endif // ACCOUNTSLISTDIALOG_H
+#endif // ACCOUNTS_LIST_DIALOG_H

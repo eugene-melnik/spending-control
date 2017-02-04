@@ -23,7 +23,9 @@
 
 #include <QMap>
 #include <QString>
+#include <QStringList>
 #include <QVariant>
+#include <QVariantList>
 
 
 typedef QMap<QString,QString> StringMap;
