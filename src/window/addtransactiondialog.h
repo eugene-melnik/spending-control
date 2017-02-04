@@ -1,6 +1,6 @@
 /*************************************************************************************************
  *                                                                                                *
- *  file: version.h                                                                               *
+ *  file: addtransactiondialog.h                                                                  *
  *                                                                                                *
  *  SpendingControl                                                                               *
  *  Copyright (C) 2017 Eugene Melnik <jeka7js@gmail.com>                                          *
@@ -18,53 +18,22 @@
  *                                                                                                *
   *************************************************************************************************/
 
-#ifndef VERSION_H
-#define VERSION_H
+#ifndef ADD_TRANSACTION_DIALOG_H
+#define ADD_TRANSACTION_DIALOG_H
 
-#include <QList>
-#include <QObject>
+#include "edittransactiondialog.h"
+
+#include <QShowEvent>
 
 
-namespace Application
+class AddTransactionDialog : public EditTransactionDialog
 {
-      // Main information
-    const QString appName = "spending-control";
-    const QString appNameGui = "SpendingControl";
-    const QString appLicense = "GNU GPL v2";
-    const QString appWebsite = "-";
-    const QString appDescription = QObject::tr( " -- description -- " ); // FIXME
+    public:
+        AddTransactionDialog( QWidget* parent = nullptr );
 
-      // Author
-    const QString appAuthor = "Eugene Melnik <jeka7js@gmail.com>";
-    const QString orgName   = "Eugene Melnik";
-    const QString orgDomain = "eugene.melnik.com";
-
-      // Versions
-    const quint8  verMajor = 0;
-    const quint8  verMinor = 1;
-    const quint8  verFix = 0;
-
-    const QString appVersionFull = QString( "%1.%2.%3" ).arg( verMajor ).arg( verMinor ).arg( verFix );
-    const QString appBuildDate = QString( __DATE__ );
-
-    const quint8  databaseVersion = 3;
-
-    const quint8 settingsVersion = 1;
-
-      // Locales
-    struct Locale
-    {
-        QString title;
-        QString selfTitle;
-        QString name;
-        QString translator;
-    };
-
-    const QList<Locale> supportedLocales =
-    {
-        { "English",    "English",     "en",     appAuthor }
-    };
-}
+    protected:
+        void showEvent( QShowEvent* event );
+};
 
 
-#endif // VERSION_H
+#endif // ADD_TRANSACTION_DIALOG_H

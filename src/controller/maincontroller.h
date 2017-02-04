@@ -21,9 +21,14 @@
 #ifndef MAIN_CONTROLLER_H
 #define MAIN_CONTROLLER_H
 
+#include "model/accountsmodel.h"
+#include "model/categoriesmodel.h"
+#include "model/transactionsmodel.h"
+#include "model/transactionitemsmodel.h"
 #include "window/accountslistdialog.h"
 #include "window/addaccountdialog.h"
 #include "window/mainwindow.h"
+#include "window/addtransactiondialog.h"
 
 #include <QApplication>
 #include <QObject>
@@ -39,6 +44,7 @@ class MainController : public QObject
 
     protected slots:
         void showAddTransaction();
+        void addTransaction( const UniMap& fieldsData );
 
         void showManageAccounts();
         void showAddAccount();
@@ -53,17 +59,38 @@ class MainController : public QObject
     protected:
         QString getDefaultConfigDir() const;
 
+        AccountsModel* getAccountsModel();
+        TransactionsModel* getTransactionsModel();
+        TransactionItemsModel* getTransactionItemsModel();
+        CategoriesModel* getCategoriesModel();
+
     private:
         void handleCommandLine( QApplication& app );
+
         void setupDatabase();
         void createDialogs();
         void connectSignals();
 
+        void preloadModels();
+
+        /**
+         * Windows
+         */
         MainWindow* mainWindow = nullptr;
+
+        AddTransactionDialog* addTransactionDialog = nullptr;
 
         AccountsListDialog* accountsListDialog = nullptr;
         AddAccountDialog* addAccountDialog = nullptr;
         EditAccountDialog* editAccountDialog = nullptr;
+
+        /**
+         * Models
+         */
+        AccountsModel* accountsModel = nullptr;
+        TransactionsModel* transactionsModel = nullptr;
+        TransactionItemsModel* transactionItemsModel = nullptr;
+        CategoriesModel* categoriesModel = nullptr;
 };
 
 

@@ -35,36 +35,51 @@ HEADERS += \
     database/manager.h \
     database/migration.h \
     database/query.h \
+    delegate/doublespinboxdelegate.h \
     model/accountsmodel.h \
+    model/categoriesmodel.h \
+    model/transactionsmodel.h \
+    model/transactionitemsmodel.h \
     tool/commandlineparser.h \
     tool/logger.h \
     tool/settings.h \
     window/accountslistdialog.h \
     window/addaccountdialog.h \
+    window/addtransactiondialog.h \
     window/editaccountdialog.h \
+    window/edittransactiondialog.h \
     window/mainwindow.h \
     defines.h \
     types.h \
-    version.h
+    version.h \
+    delegate/comboboxdelegate.h
 
 SOURCES += \
     controller/maincontroller.cpp \
     database/manager.cpp \
     database/migration.cpp \
     database/query.cpp \
+    delegate/doublespinboxdelegate.cpp \
     model/accountsmodel.cpp \
+    model/categoriesmodel.cpp \
+    model/transactionsmodel.cpp \
+    model/transactionitemsmodel.cpp \
     tool/commandlineparser.cpp \
     tool/logger.cpp \
     tool/settings.cpp \
     window/accountslistdialog.cpp \
     window/addaccountdialog.cpp \
+    window/addtransactiondialog.cpp \
     window/editaccountdialog.cpp \
+    window/edittransactiondialog.cpp \
     window/mainwindow.cpp \
-    main.cpp
+    main.cpp \
+    delegate/comboboxdelegate.cpp
 
 FORMS += \
     window/accountslistdialog.ui \
     window/editaccountdialog.ui \
+    window/edittransactiondialog.ui \
     window/mainwindow.ui
 
 

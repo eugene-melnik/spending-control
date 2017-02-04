@@ -1,6 +1,6 @@
 /*************************************************************************************************
  *                                                                                                *
- *  file: version.h                                                                               *
+ *  file: doublespinboxdelegate.cpp                                                               *
  *                                                                                                *
  *  SpendingControl                                                                               *
  *  Copyright (C) 2017 Eugene Melnik <jeka7js@gmail.com>                                          *
@@ -18,53 +18,37 @@
  *                                                                                                *
   *************************************************************************************************/
 
-#ifndef VERSION_H
-#define VERSION_H
+#include "doublespinboxdelegate.h"
 
-#include <QList>
-#include <QObject>
+#include <QDoubleSpinBox>
 
 
-namespace Application
+QWidget* DoubleSpinboxDelegate::createEditor( QWidget* parent, const QStyleOptionViewItem&, const QModelIndex& ) const
 {
-      // Main information
-    const QString appName = "spending-control";
-    const QString appNameGui = "SpendingControl";
-    const QString appLicense = "GNU GPL v2";
-    const QString appWebsite = "-";
-    const QString appDescription = QObject::tr( " -- description -- " ); // FIXME
+    QDoubleSpinBox* editor = new QDoubleSpinBox( parent );
 
-      // Author
-    const QString appAuthor = "Eugene Melnik <jeka7js@gmail.com>";
-    const QString orgName   = "Eugene Melnik";
-    const QString orgDomain = "eugene.melnik.com";
+    editor->setFrame( false );
+    editor->setRange( 0.0, 10000000.0 );
 
-      // Versions
-    const quint8  verMajor = 0;
-    const quint8  verMinor = 1;
-    const quint8  verFix = 0;
-
-    const QString appVersionFull = QString( "%1.%2.%3" ).arg( verMajor ).arg( verMinor ).arg( verFix );
-    const QString appBuildDate = QString( __DATE__ );
-
-    const quint8  databaseVersion = 3;
-
-    const quint8 settingsVersion = 1;
-
-      // Locales
-    struct Locale
-    {
-        QString title;
-        QString selfTitle;
-        QString name;
-        QString translator;
-    };
-
-    const QList<Locale> supportedLocales =
-    {
-        { "English",    "English",     "en",     appAuthor }
-    };
+    return( editor );
 }
 
 
-#endif // VERSION_H
+void DoubleSpinboxDelegate::setEditorData( QWidget* editor, const QModelIndex& index ) const
+{
+    QDoubleSpinBox* spinBox = static_cast<QDoubleSpinBox*>( editor );
+    spinBox->setValue( index.model()->data( index, Qt::EditRole ).toDouble() );
+}
+
+
+void DoubleSpinboxDelegate::setModelData( QWidget* editor, QAbstractItemModel* model, const QModelIndex& index ) const
+{
+    QDoubleSpinBox* spinBox = static_cast<QDoubleSpinBox*>( editor );
+    model->setData( index, spinBox->value(), Qt::EditRole );
+}
+
+
+void DoubleSpinboxDelegate::updateEditorGeometry( QWidget* editor, const QStyleOptionViewItem& option, const QModelIndex& ) const
+{
+    editor->setGeometry( option.rect );
+}

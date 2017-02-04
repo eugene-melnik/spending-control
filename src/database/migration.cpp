@@ -191,7 +191,7 @@ void DatabaseMigration::setupMigrations()
                 FOREIGN KEY (transaction_id) REFERENCES transactions(id), \
                 FOREIGN KEY (category_id) REFERENCES categories(id) \
             );",
-            "CREATE INDEX transaction_items_transaction_id_idx ON transaction_items(transaction_id);"
+            "CREATE INDEX transaction_items_transaction_id_idx ON transaction_items(transaction_id);",
             "CREATE INDEX transaction_items_category_id_idx ON transaction_items(category_id);"
         }
     );

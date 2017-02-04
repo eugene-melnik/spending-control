@@ -306,6 +306,20 @@ UniMap AccountsModel::getRecordsMapped( int row ) const
 }
 
 
+UniMap AccountsModel::getList() const
+{
+    UniMap list;
+
+    for( int row = 0; row < this->rowCount(); ++row )
+    {
+        QVariantList rowData = this->getRecord( row );
+        list.insert( rowData.at( Column::Id ).toString(), rowData.at( Column::Name ) );
+    }
+
+    return( list );
+}
+
+
 QStringList AccountsModel::getTypes()
 {
     return( AccountsModel::types );

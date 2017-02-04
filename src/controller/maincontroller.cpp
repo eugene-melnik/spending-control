@@ -38,9 +38,12 @@ MainController::MainController( QApplication& app )
     AppLogger->funcStart( "MainController::MainController" );
 
     this->handleCommandLine( app );
+
     this->setupDatabase();
     this->createDialogs();
     this->connectSignals();
+
+    this->preloadModels();
 
     this->mainWindow->show();
 
@@ -51,12 +54,90 @@ MainController::MainController( QApplication& app )
 MainController::~MainController()
 {
     delete this->mainWindow;
+
+    if( this->accountsModel != nullptr )
+    {
+        delete this->accountsModel;
+    }
+
+    if( this->transactionsModel != nullptr )
+    {
+        delete this->transactionsModel;
+    }
+
+    if( this->transactionItemsModel != nullptr )
+    {
+        delete this->transactionItemsModel;
+    }
 }
 
 
 void MainController::showAddTransaction()
 {
-    //
+    AppLogger->funcStart( "MainController::showAddTransaction" );
+
+    if( this->addTransactionDialog == nullptr )
+    {
+        AppLogger->debug( "AddTransactionDialog creation..." );
+
+        this->addTransactionDialog = new AddTransactionDialog( this->mainWindow );
+
+        this->connect( this->addTransactionDialog, &AddTransactionDialog::saveData, this, &MainController::addTransaction );
+    }
+
+    this->addTransactionDialog->setAccountsList( this->getAccountsModel()->getList() );
+    this->addTransactionDialog->setCategoriesList( this->getCategoriesModel()->getList() );
+
+    this->addTransactionDialog->show();
+
+    AppLogger->funcDone( "MainController::showAddTransaction" );
+}
+
+
+void MainController::addTransaction( const UniMap& fieldsData )
+{
+    AppLogger->funcStart( "MainController::addTransaction", fieldsData );
+
+    unsigned int transactionId = 0;
+    bool ok = this->getTransactionsModel()->addRecord( fieldsData, &transactionId );
+
+    if( fieldsData.contains( "transaction_subitems" ) )
+    {
+        QList<QVariantList> subitems = fieldsData.value( "transaction_subitems" ).value<QList<QVariantList>>();
+        TransactionItemsModel* transactionItemsModel = this->getTransactionItemsModel();
+
+        for( const QVariantList& rowData : subitems )
+        {
+            bool added = transactionItemsModel->addRecord({
+                { "transaction_id", transactionId },
+                { "name",           rowData.at( 0 ) },
+                { "category_id",    rowData.at( 1 ) },
+                { "amount",         rowData.at( 2 ) }
+            });
+
+            if( !added )
+            {
+                QMessageBox::warning(
+                    this->mainWindow,
+                    tr( "Save transaction data" ),
+                    tr( "Internal error - can't save item \"%1\", please see log file for details." ).arg(
+                        rowData.at( 0 ).toString()
+                    )
+                );
+            }
+        }
+    }
+
+    if( !ok )
+    {
+        QMessageBox::warning(
+            this->mainWindow,
+            tr( "Save transaction data" ),
+            tr( "Internal error occurred, please see log file for details." )
+        );
+    }
+
+    AppLogger->funcDone( "MainController::addTransaction" );
 }
 
 
@@ -235,6 +316,50 @@ QString MainController::getDefaultConfigDir() const
 }
 
 
+AccountsModel* MainController::getAccountsModel()
+{
+    if( this->accountsModel == nullptr )
+    {
+        this->accountsModel = new AccountsModel( DatabaseManager::getInstance()->getDatabase() );
+    }
+
+    return( this->accountsModel );
+}
+
+
+TransactionsModel* MainController::getTransactionsModel()
+{
+    if( this->transactionsModel == nullptr )
+    {
+        this->transactionsModel = new TransactionsModel( DatabaseManager::getInstance()->getDatabase() );
+    }
+
+    return( this->transactionsModel );
+}
+
+
+TransactionItemsModel* MainController::getTransactionItemsModel()
+{
+    if( this->transactionItemsModel == nullptr )
+    {
+        this->transactionItemsModel = new TransactionItemsModel( DatabaseManager::getInstance()->getDatabase() );
+    }
+
+    return( this->transactionItemsModel );
+}
+
+
+CategoriesModel* MainController::getCategoriesModel()
+{
+    if( this->categoriesModel == nullptr )
+    {
+        this->categoriesModel = new CategoriesModel( DatabaseManager::getInstance()->getDatabase() );
+    }
+
+    return( this->categoriesModel );
+}
+
+
 void MainController::handleCommandLine( QApplication& app )
 {
     CommandLineParser parser;
@@ -346,4 +471,13 @@ void MainController::connectSignals()
     this->connect( this->mainWindow, &MainWindow::manageCategories, this, &MainController::showManageCategories );
 
     this->connect( this->mainWindow, &MainWindow::aboutToClose, this, &MainController::exit );
+}
+
+
+void MainController::preloadModels()
+{
+    AppLogger->debug( "MainController::preloadModels()" );
+
+    this->getAccountsModel();
+    this->getTransactionsModel();
 }
