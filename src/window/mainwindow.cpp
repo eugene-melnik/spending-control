@@ -37,6 +37,25 @@ MainWindow::MainWindow( QWidget* parent ) : QMainWindow( parent )
 }
 
 
+void MainWindow::setAccountsStatusModel( QAbstractItemModel* model )
+{
+    QAbstractItemModel* currentModel = this->tvAccountsStatus->model();
+
+    if( currentModel != nullptr )
+    {
+        delete currentModel;
+    }
+
+    this->tvAccountsStatus->setModel( model );
+}
+
+
+void MainWindow::resetAccountsStatusData()
+{
+    this->tvAccountsStatus->reset();
+}
+
+
 void MainWindow::closeEvent( QCloseEvent* event )
 {
     emit this->aboutToClose();

@@ -44,7 +44,7 @@ bool TransactionItemsModel::addRecord( const UniMap& fieldsData, unsigned int* c
     query.bindValue( 0, fieldsData.value( "transaction_id" ) );
     query.bindValue( 1, fieldsData.value( "name" ) );
     query.bindValue( 2, fieldsData.value( "category_id" ) );
-    query.bindValue( 3, (int) (fieldsData.value( "amount" ).toDouble() * 100) );
+    query.bindValue( 3, fieldsData.value( "amount" ) );
 
     bool ok = query.exec();
 

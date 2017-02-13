@@ -38,10 +38,14 @@ void EditAccountDialog::setTypes( QStringList types )
 }
 
 
-void EditAccountDialog::setCurrencies( QStringList currencies )
+void EditAccountDialog::setCurrencies( const UniMap& currencies )
 {
     this->cbCurrency->clear();
-    this->cbCurrency->addItems( currencies );
+
+    for( const QString& key : currencies.keys() )
+    {
+        this->cbCurrency->addItem( currencies.value( key ).toString(), key );
+    }
 }
 
 
@@ -52,9 +56,17 @@ void EditAccountDialog::setValues( const UniMap& fieldsData )
     this->eName->setText( fieldsData.value( "name" ).toString() );
     this->eDescription->setText( fieldsData.value( "description" ).toString() );
     this->cbType->setCurrentIndex( fieldsData.value( "type" ).toInt() );
-    this->cbCurrency->setCurrentIndex( fieldsData.value( "currency" ).toInt() );
     this->sbInitialBalance->setValue( (double) fieldsData.value( "initial_balance" ).toInt() / 100.0 );
     this->sbMinimalBalance->setValue( (double) fieldsData.value( "minimal_balance" ).toInt() / 100.0 );
+
+    for( int row = 0; row < this->cbCurrency->count(); ++row )
+    {
+        if( this->cbCurrency->itemData( row ).toString() == fieldsData.value( "currency" ).toString() )
+        {
+            this->cbCurrency->setCurrentIndex( row );
+            break;
+        }
+    }
 }
 
 
@@ -76,9 +88,9 @@ void EditAccountDialog::okClicked()
         { "name",           this->eName->text() },
         { "description",    this->eDescription->toPlainText() },
         { "type",           this->cbType->currentIndex() },
-        { "currency",       this->cbCurrency->currentIndex() },
-        { "initial_balance", this->sbInitialBalance->value() },
-        { "minimal_balance", this->sbMinimalBalance->value() }
+        { "currency",       this->cbCurrency->currentData() },
+        { "initial_balance", (int) (this->sbInitialBalance->value() * 100) },
+        { "minimal_balance", (int) (this->sbMinimalBalance->value() * 100) }
     };
 
     emit this->saveData( fieldsData );

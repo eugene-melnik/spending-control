@@ -36,7 +36,7 @@ class EditAccountDialog : public QDialog, protected Ui::EditAccountDialog
         explicit EditAccountDialog( QWidget* parent = nullptr );
 
         void setTypes( QStringList types );
-        void setCurrencies( QStringList currencies );
+        void setCurrencies( const UniMap& currencies );
 
         void setValues( const UniMap& fieldsData );
 

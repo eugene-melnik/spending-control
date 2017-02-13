@@ -34,6 +34,9 @@ class MainWindow : public QMainWindow, protected Ui::MainWindow
     public:
         explicit MainWindow( QWidget* parent = nullptr );
 
+        void setAccountsStatusModel( QAbstractItemModel* model );
+        void resetAccountsStatusData();
+
     signals:
         void addTransaction();
         void manageAccounts();

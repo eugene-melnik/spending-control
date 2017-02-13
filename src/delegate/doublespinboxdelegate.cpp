@@ -29,6 +29,7 @@ QWidget* DoubleSpinboxDelegate::createEditor( QWidget* parent, const QStyleOptio
 
     editor->setFrame( false );
     editor->setRange( 0.0, 10000000.0 );
+    editor->setDecimals( 2 );
 
     return( editor );
 }

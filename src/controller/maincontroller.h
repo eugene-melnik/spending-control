@@ -72,6 +72,9 @@ class MainController : public QObject
         void connectSignals();
 
         void preloadModels();
+        void showAccountsStatus();
+
+        void recalculateAccountBalance( const QDateTime& fromDate, int accountId );
 
         /**
          * Windows

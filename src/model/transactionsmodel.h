@@ -37,6 +37,8 @@ class TransactionsModel : public QAbstractTableModel
         explicit TransactionsModel( QSqlDatabase database );
 
         bool addRecord( const UniMap& fieldsData, unsigned int* createdId = nullptr );
+        bool updateRecord( const UniMap& fieldsData );
+        bool deleteRecord( int transactionId );
 
         int rowCount( const QModelIndex& parent = QModelIndex() ) const override;
         int columnCount( const QModelIndex& parent = QModelIndex() ) const override;
@@ -44,11 +46,28 @@ class TransactionsModel : public QAbstractTableModel
         QVariant data( const QModelIndex& index, int role = Qt::DisplayRole ) const override;
         QVariant headerData( int section, Qt::Orientation orientation, int role = Qt::DisplayRole ) const override;
 
+        QVariantList getRecord( int row ) const;
+        UniMap getRecordMapped( int row ) const;
+
         enum Type
         {
-            OUTGOING,
-            INCOMING,
-            INTERNAL
+            Outgoing,
+            Incoming,
+            Internal
+        };
+
+        enum Column
+        {
+            Id,
+            Type,
+            Amount,
+            BalanceAfter,
+            Date,
+            Planned,
+            SourceAccountId,
+            DestinationAccountId,
+            CategoryId,
+            Notes
         };
 
     protected:

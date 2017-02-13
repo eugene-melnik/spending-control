@@ -50,7 +50,7 @@ class AccountsModel : public QAbstractTableModel
         QVariant headerData( int section, Qt::Orientation orientation, int role = Qt::DisplayRole ) const override;
 
         QVariantList getRecord( int row ) const;
-        UniMap getRecordsMapped( int row ) const;
+        UniMap getRecordMapped( int row ) const;
 
         UniMap getList() const;
 
@@ -66,8 +66,10 @@ class AccountsModel : public QAbstractTableModel
             ClosedAt
         };
 
+        static UniMap getById( int id, QSqlDatabase database );
+
         static QStringList getTypes();
-        static QStringList getCurrencies();
+        static UniMap getCurrencies();
 
     protected:
         QSqlDatabase database;

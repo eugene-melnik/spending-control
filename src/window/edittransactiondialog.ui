@@ -24,7 +24,7 @@
          <height>16777215</height>
         </size>
        </property>
-       <layout class="QVBoxLayout" name="verticalLayout">
+       <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,0,0,0,1">
         <property name="leftMargin">
          <number>0</number>
         </property>
@@ -164,7 +164,7 @@
      <item>
       <widget class="QStackedWidget" name="swContent">
        <widget class="QWidget" name="pageOutgoing">
-        <layout class="QVBoxLayout" name="verticalLayout_7">
+        <layout class="QVBoxLayout" name="verticalLayout_7" stretch="0,0,0,1">
          <property name="leftMargin">
           <number>0</number>
          </property>
@@ -416,7 +416,14 @@
             </widget>
            </item>
            <item>
-            <widget class="QDoubleSpinBox" name="sbAmountIncoming"/>
+            <widget class="QDoubleSpinBox" name="sbAmountIncoming">
+             <property name="minimum">
+              <double>-10000000.000000000000000</double>
+             </property>
+             <property name="maximum">
+              <double>1000000.000000000000000</double>
+             </property>
+            </widget>
            </item>
           </layout>
          </item>
@@ -502,7 +509,14 @@
             </widget>
            </item>
            <item>
-            <widget class="QDoubleSpinBox" name="sbAmountInternal"/>
+            <widget class="QDoubleSpinBox" name="sbAmountInternal">
+             <property name="minimum">
+              <double>-10000000.000000000000000</double>
+             </property>
+             <property name="maximum">
+              <double>10000000.000000000000000</double>
+             </property>
+            </widget>
            </item>
           </layout>
          </item>

@@ -29,7 +29,7 @@
 #include "ui_edittransactiondialog.h"
 
 
-class EditTransactionDialog : public QDialog, public Ui::EditTransactionDialog
+class EditTransactionDialog : public QDialog, protected Ui::EditTransactionDialog
 {
     Q_OBJECT
 
@@ -48,6 +48,7 @@ class EditTransactionDialog : public QDialog, public Ui::EditTransactionDialog
     protected slots:
         void setCurrentDate();
         void changeType();
+        void clearPageValues( int page );
 
         void createSubitem();
         void deleteSubitem();

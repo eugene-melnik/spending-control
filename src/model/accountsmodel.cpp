@@ -81,8 +81,8 @@ bool AccountsModel::addRecord( const UniMap& fieldsData )
     query.bindValue( 1, fieldsData.value( "description" ) );
     query.bindValue( 2, fieldsData.value( "type" ) );
     query.bindValue( 3, fieldsData.value( "currency" ) );
-    query.bindValue( 4, (int) (fieldsData.value( "initial_balance" ).toDouble() * 100) );
-    query.bindValue( 5, (int) (fieldsData.value( "minimal_balance" ).toDouble() * 100) );
+    query.bindValue( 4, fieldsData.value( "initial_balance" ) );
+    query.bindValue( 5, fieldsData.value( "minimal_balance" ) );
     query.bindValue( 6, QDateTime::currentDateTime().toString( Qt::ISODate ) );
 
     bool ok = query.exec();
@@ -115,9 +115,9 @@ bool AccountsModel::updateRecord( const UniMap& fieldsData )
     query.bindValue( 1, fieldsData.value( "description" ) );
     query.bindValue( 2, fieldsData.value( "type" ) );
     query.bindValue( 3, fieldsData.value( "currency" ) );
-    query.bindValue( 4, (int) (fieldsData.value( "initial_balance" ).toDouble() * 100) );
-    query.bindValue( 5, (int) (fieldsData.value( "minimal_balance" ).toDouble() * 100) );
-    query.bindValue( 6, fieldsData.value( "id" ).toInt() );
+    query.bindValue( 4, fieldsData.value( "initial_balance" ) );
+    query.bindValue( 5, fieldsData.value( "minimal_balance" ) );
+    query.bindValue( 6, fieldsData.value( "id" ) );
 
     bool ok = query.exec();
 
@@ -265,7 +265,7 @@ QVariantList AccountsModel::getRecord( int row ) const
         QSqlQuery query( this->database );
 
         query.prepare(
-            "SELECT id, name, description, type, currency, initial_balance, minimal_balance, closed_at \
+            "SELECT id, name, description, type, currency, initial_balance, minimal_balance \
             FROM accounts WHERE closed_at IS NULL ORDER BY name ASC LIMIT 1 OFFSET ?;"
         );
 
@@ -281,8 +281,7 @@ QVariantList AccountsModel::getRecord( int row ) const
                 query.value( Column::Type ),
                 query.value( Column::Currency ),
                 query.value( Column::InitialBalance ),
-                query.value( Column::MinimalBalance ),
-                query.value( Column::ClosedAt )
+                query.value( Column::MinimalBalance )
             } );
         }
         else
@@ -295,10 +294,9 @@ QVariantList AccountsModel::getRecord( int row ) const
 }
 
 
-UniMap AccountsModel::getRecordsMapped( int row ) const
+UniMap AccountsModel::getRecordMapped( int row ) const
 {
     UniMap result;
-
     QVariantList record = this->getRecord( row );
 
     if( !record.isEmpty() )
@@ -310,8 +308,7 @@ UniMap AccountsModel::getRecordsMapped( int row ) const
             { "type",           record.at( Column::Type ) },
             { "currency",       record.at( Column::Currency ) },
             { "initial_balance", record.at( Column::InitialBalance ) },
-            { "minimal_balance", record.at( Column::MinimalBalance ) },
-            { "closed_at",      record.at( Column::ClosedAt ) }
+            { "minimal_balance", record.at( Column::MinimalBalance ) }
         };
     }
 
@@ -333,15 +330,46 @@ UniMap AccountsModel::getList() const
 }
 
 
+UniMap AccountsModel::getById( int id, QSqlDatabase database )
+{
+    UniMap result;
+    QSqlQuery query( database );
+
+    query.prepare(
+        "SELECT id, name, description, type, currency, initial_balance, minimal_balance, closed_at \
+        FROM accounts WHERE id = ?;"
+    );
+
+    query.bindValue( 0, id );
+    query.exec();
+
+    if( query.first() )
+    {
+        result = {
+            { "id",             query.value( Column::Id ) },
+            { "name",           query.value( Column::Name ) },
+            { "description",    query.value( Column::Description ) },
+            { "type",           query.value( Column::Type ) },
+            { "currency",       query.value( Column::Currency ) },
+            { "initial_balance", query.value( Column::InitialBalance ) },
+            { "minimal_balance", query.value( Column::MinimalBalance ) },
+            { "closed_at",      query.value( Column::ClosedAt ) }
+        };
+    }
+
+    return( result );
+}
+
+
 QStringList AccountsModel::getTypes()
 {
     return( AccountsModel::types );
 }
 
 
-QStringList AccountsModel::getCurrencies()
+UniMap AccountsModel::getCurrencies()
 {
-    QStringList result;
+    UniMap result;
 
     for ( const QString& key : AccountsModel::currencies.keys() )
     {
@@ -351,11 +379,11 @@ QStringList AccountsModel::getCurrencies()
             QString name = values.at( 1 ).toString();
             QString symbol = values.at( 2 ).toString();
 
-            result.append( key + " - " + name + " (" + symbol + ")" );
+            result.insert( key, key + " - " + name + " (" + symbol + ")" );
         }
         else
         {
-            result.append( key );
+            result.insert( key, key );
         }
     }
 

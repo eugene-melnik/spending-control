@@ -83,10 +83,11 @@ void EditTransactionDialog::setValues( const UniMap& fieldsData )
     this->eDatetime->setDateTime( QDateTime::fromString( date , Qt::ISODate ) );
 
     int type = fieldsData.value( "type" ).toInt();
+    this->clearPageValues( type );
 
     switch( type )
     {
-        case TransactionsModel::Type::OUTGOING :
+        case TransactionsModel::Outgoing :
         {
             this->bTypeOutgoing->setChecked( true );
 
@@ -95,7 +96,7 @@ void EditTransactionDialog::setValues( const UniMap& fieldsData )
             break;
         }
 
-        case TransactionsModel::Type::INCOMING :
+        case TransactionsModel::Incoming :
         {
             this->bTypeIncoming->setChecked( true );
 
@@ -104,7 +105,7 @@ void EditTransactionDialog::setValues( const UniMap& fieldsData )
             break;
         }
 
-        case TransactionsModel::Type::INTERNAL :
+        case TransactionsModel::Internal :
         {
             this->bTypeInternal->setChecked( true );
 
@@ -127,9 +128,45 @@ void EditTransactionDialog::setCurrentDate()
 
 void EditTransactionDialog::changeType()
 {
-    // TODO: reset pages content
-
     this->swContent->setCurrentIndex( this->getCurrentType() );
+}
+
+
+void EditTransactionDialog::clearPageValues( int page )
+{
+    this->setCurrentDate();
+
+    switch( page )
+    {
+        case TransactionsModel::Outgoing :
+        {
+            this->cbAccountOutgoing->setCurrentIndex( 0 );
+            this->sbAmountOutgoing->setValue( 0.0 );
+            this->cbCategoryOutgoing->setCurrentIndex( 0 );
+            this->eNotesOutgoing->clear();
+            this->twSubitems->clearContents();
+            this->twSubitems->setRowCount( 0 );
+            break;
+        }
+
+        case TransactionsModel::Incoming :
+        {
+            this->cbDestinationAccountIncoming->setCurrentIndex( 0 );
+            this->sbAmountIncoming->setValue( 0.0 );
+            this->cbCategoryIncoming->setCurrentIndex( 0 );
+            this->eNotesIncoming->clear();
+            break;
+        }
+
+        case TransactionsModel::Internal :
+        {
+            this->cbSourceAccountInternal->setCurrentIndex( 0 );
+            this->cbDestinationAccountInternal->setCurrentIndex( 1 );
+            this->sbAmountInternal->setValue( 0.0 );
+            this->eNotesInternal->clear();
+            break;
+        }
+    }
 }
 
 
@@ -142,9 +179,17 @@ void EditTransactionDialog::createSubitem()
     if( newRowId == 0 || (lastItem != nullptr && !lastItem->text().isEmpty()) )
     {
         this->twSubitems->insertRow( newRowId );
-        this->twSubitems->setItem( newRowId, SubitemColumn::Name, new QTableWidgetItem( "" ) );
-        this->twSubitems->setItem( newRowId, SubitemColumn::CategoryId, new QTableWidgetItem( this->cbCategoryOutgoing->currentText() ) );
-        this->twSubitems->setItem( newRowId, SubitemColumn::Amount, new QTableWidgetItem( "0" ) );
+
+        QTableWidgetItem* name = new QTableWidgetItem( "" );
+        this->twSubitems->setItem( newRowId, SubitemColumn::Name, name );
+
+        QTableWidgetItem* category = new QTableWidgetItem( this->cbCategoryOutgoing->currentText() );
+        category->setData( Qt::UserRole, this->cbCategoryOutgoing->currentData() );
+        this->twSubitems->setItem( newRowId, SubitemColumn::CategoryId, category );
+
+        QTableWidgetItem* amount = new QTableWidgetItem( "0" );
+        this->twSubitems->setItem( newRowId, SubitemColumn::Amount, amount );
+
         this->twSubitems->editItem( this->twSubitems->item( newRowId, SubitemColumn::Name ) );
     }
     else
@@ -201,15 +246,15 @@ int EditTransactionDialog::getCurrentType() const
 
     if( button->objectName() == "bTypeOutgoing" )
     {
-        return( TransactionsModel::Type::OUTGOING );
+        return( TransactionsModel::Outgoing );
     }
     else if( button->objectName() == "bTypeIncoming" )
     {
-        return( TransactionsModel::Type::INCOMING );
+        return( TransactionsModel::Incoming );
     }
     else // if( button->objectName() == "bTypeInternal" )
     {
-        return( TransactionsModel::Type::INTERNAL );
+        return( TransactionsModel::Internal );
     }
 }
 
@@ -220,7 +265,7 @@ UniMap EditTransactionDialog::getCurrentPageValues() const
 
     switch( this-> getCurrentType() )
     {
-        case TransactionsModel::Type::OUTGOING :
+        case TransactionsModel::Outgoing :
         {
             values.insert( "source_account_id", this->cbAccountOutgoing->currentData().toInt() );
             values.insert( "amount", this->sbAmountOutgoing->value() );
@@ -238,7 +283,7 @@ UniMap EditTransactionDialog::getCurrentPageValues() const
                 // 1
                 rowData.append( this->twSubitems->item( row, SubitemColumn::CategoryId )->data( Qt::UserRole ) );
                 // 2
-                rowData.append( this->twSubitems->item( row, SubitemColumn::Amount )->text() );
+                rowData.append( (int) (this->twSubitems->item( row, SubitemColumn::Amount )->text().toDouble() * 100) );
 
                 subitems.append( rowData );
             }
@@ -248,7 +293,7 @@ UniMap EditTransactionDialog::getCurrentPageValues() const
             break;
         }
 
-        case TransactionsModel::Type::INCOMING :
+        case TransactionsModel::Incoming :
         {
             values.insert( "destination_account_id", this->cbDestinationAccountIncoming->currentData().toInt() );
             values.insert( "amount", this->sbAmountIncoming->value() );
@@ -258,7 +303,7 @@ UniMap EditTransactionDialog::getCurrentPageValues() const
             break;
         }
 
-        case TransactionsModel::Type::INTERNAL :
+        case TransactionsModel::Internal :
         {
             values.insert( "source_account_id", this->cbSourceAccountInternal->currentData().toInt() );
             values.insert( "destination_account_id", this->cbDestinationAccountInternal->currentData().toInt() );
@@ -281,7 +326,7 @@ void EditTransactionDialog::okClicked()
     UniMap fieldsData = {
         { "id",                     this->transactionId },
         { "type",                   this->getCurrentType() },
-        { "amount",                 currentPageValues.value( "amount" ) },
+        { "amount",                 (int) (currentPageValues.value( "amount" ).toDouble() * 100) },
         { "date",                   this->eDatetime->dateTime().toString( Qt::ISODate ) },
         { "source_account_id",      currentPageValues.value( "source_account_id", 0 ) },
         { "destination_account_id", currentPageValues.value( "destination_account_id", 0 ) },

@@ -18,6 +18,7 @@
  *                                                                                                *
   *************************************************************************************************/
 
+#include "model/transactionsmodel.h"
 #include "addtransactiondialog.h"
 
 
@@ -32,8 +33,12 @@ void AddTransactionDialog::showEvent( QShowEvent* event )
 {
     this->transactionId = 0;
 
-    this->setCurrentDate();
-    // TODO: clear all fields
+    this->clearPageValues( TransactionsModel::Outgoing );
+    this->clearPageValues( TransactionsModel::Incoming );
+    this->clearPageValues( TransactionsModel::Internal );
+
+    this->bTypeOutgoing->setChecked( true );
+    this->swContent->setCurrentIndex( TransactionsModel::Outgoing );
 
     event->accept();
 }

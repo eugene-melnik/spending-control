@@ -48,8 +48,8 @@ bool TransactionsModel::addRecord( const UniMap& fieldsData, unsigned int* creat
     );
 
     query.bindValue( 0, fieldsData.value( "type" ) );
-    query.bindValue( 1, (int) fieldsData.value( "amount" ).toDouble() * 100 );
-    query.bindValue( 2, (int) fieldsData.value( "balance_after" ).toDouble() * 100 );
+    query.bindValue( 1, fieldsData.value( "amount" ) );
+    query.bindValue( 2, fieldsData.value( "balance_after", 0 ) );
     query.bindValue( 3, fieldsData.value( "date" ) );
     query.bindValue( 4, fieldsData.value( "planned", 0 ) );
     query.bindValue( 5, fieldsData.value( "source_account_id", 0 ) );
@@ -83,9 +83,80 @@ bool TransactionsModel::addRecord( const UniMap& fieldsData, unsigned int* creat
 }
 
 
+bool TransactionsModel::updateRecord( const UniMap& fieldsData )
+{
+    this->beginResetModel();
+
+    DatabaseQuery query( this->database );
+
+    query.prepare(
+        "UPDATE transactions \
+            SET type = ?, amount = ?, balance_after = ?, date = ?, planned = ?, source_account_id = ?, \
+                destination_account_id = ?, category_id = ?, notes = ? \
+        WHERE id = ?;"
+    );
+
+    query.bindValue( 0, fieldsData.value( "type" ) );
+    query.bindValue( 1, fieldsData.value( "amount" ) );
+    query.bindValue( 2, fieldsData.value( "balance_after", 0 ) );
+    query.bindValue( 3, fieldsData.value( "date" ) );
+    query.bindValue( 4, fieldsData.value( "planned", 0 ) );
+    query.bindValue( 5, fieldsData.value( "source_account_id", 0 ) );
+    query.bindValue( 6, fieldsData.value( "destination_account_id", 0 ) );
+    query.bindValue( 7, fieldsData.value( "category_id" ) );
+    query.bindValue( 8, fieldsData.value( "notes", "" ) );
+    query.bindValue( 9, fieldsData.value( "id" ) );
+
+    bool ok = query.exec();
+
+    if( !ok )
+    {
+        AppLogger->error( "TransactionsModel::updateAccountRecord - Can't save transaction: " + query.lastError().text() );
+    }
+
+    this->endResetModel();
+    this->records.clear();
+
+    return( ok );
+}
+
+
+bool TransactionsModel::deleteRecord( int transactionId )
+{
+    this->beginResetModel();
+
+    DatabaseQuery query( this->database );
+    query.prepare( "DELETE FROM transactions WHERE id = ?;" );
+    query.bindValue( 0, transactionId );
+
+    bool ok = query.exec();
+
+    if( !ok )
+    {
+        AppLogger->error( "TransactionsModel::deleteAccountRecord - Can't delete transaction: " + query.lastError().text() );
+    }
+
+    this->endResetModel();
+    this->records.clear();
+
+    return( ok );
+}
+
+
 int TransactionsModel::rowCount( const QModelIndex& ) const
 {
-    return( 0 ); // FIXME: dummy
+    QSqlQuery query = this->database.exec(
+        "SELECT COUNT(*) AS transactions_count FROM transactions;"
+    );
+
+    if( query.first() )
+    {
+        return( query.value( 0 ).toInt() );
+    }
+    else
+    {
+        return( 0 );
+    }
 }
 
 
@@ -116,4 +187,70 @@ QVariant TransactionsModel::headerData( int section, Qt::Orientation orientation
     }
 
     return( QVariant() );
+}
+
+
+QVariantList TransactionsModel::getRecord( int row ) const
+{
+    if( this->records.value( row ).empty() )
+    {
+        QSqlQuery query( this->database );
+
+        query.prepare(
+            "SELECT id, type, amount, balance_after, date, planned, source_account_id, \
+                    destination_account_id, category_id, notes  \
+            FROM transactions ORDER BY date ASC LIMIT ? OFFSET ?;"
+        );
+
+        query.bindValue( 0, 1 );
+        query.bindValue( 1, row );
+        query.exec();
+
+        if( query.first() )
+        {
+            this->records.insert( row, {
+                query.value( Column::Id ),
+                query.value( Column::Type ),
+                query.value( Column::Amount ),
+                query.value( Column::BalanceAfter ),
+                query.value( Column::Date ),
+                query.value( Column::Planned ),
+                query.value( Column::SourceAccountId ),
+                query.value( Column::DestinationAccountId ),
+                query.value( Column::CategoryId ),
+                query.value( Column::Notes )
+            } );
+        }
+        else
+        {
+            return( QVariantList() );
+        }
+    }
+
+    return( this->records.value( row ) );
+}
+
+
+UniMap TransactionsModel::getRecordMapped( int row ) const
+{
+    UniMap result;
+    QVariantList record = this->getRecord( row );
+
+    if( !record.isEmpty() )
+    {
+        result = {
+            { "id",                 record.at( Column::Id ) },
+            { "type",               record.at( Column::Type ) },
+            { "amount",             record.at( Column::Amount ) },
+            { "balance_after",      record.at( Column::BalanceAfter ) },
+            { "date",               record.at( Column::Date ) },
+            { "planned",            record.at( Column::Planned ) },
+            { "source_account_id",  record.at( Column::SourceAccountId ) },
+            { "destination_account_id", record.at( Column::DestinationAccountId ) },
+            { "category_id",        record.at( Column::CategoryId ) },
+            { "notes",              record.at( Column::Notes ) }
+        };
+    }
+
+    return( result );
 }

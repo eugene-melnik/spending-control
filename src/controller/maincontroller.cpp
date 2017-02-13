@@ -30,6 +30,8 @@
 #include <QFileInfo>
 #include <QMessageBox>
 #include <QProcessEnvironment>
+#include <QSqlQueryModel>
+#include <QSqlRecord>
 
 
 MainController::MainController( QApplication& app )
@@ -43,6 +45,8 @@ MainController::MainController( QApplication& app )
     this->connectSignals();
 
     this->preloadModels();
+
+    this->showAccountsStatus();
 
     this->mainWindow->show();
 
@@ -100,16 +104,57 @@ void MainController::addTransaction( const UniMap& fieldsData )
     unsigned int transactionId = 0;
     bool ok = this->getTransactionsModel()->addRecord( fieldsData, &transactionId );
 
-    if( fieldsData.contains( "transaction_subitems" ) )
+    if( !ok )
+    {
+        QMessageBox::warning(
+            this->mainWindow,
+            tr( "Save transaction data" ),
+            tr( "Internal error occurred, please see log file for details." )
+        );
+
+        return;
+    }
+
+    int sourceAccountId = fieldsData.value( "source_account_id" ).toInt();
+    int destinationAccountId = fieldsData.value( "destination_account_id" ).toInt();
+    bool internal = fieldsData.value( "type" ).toInt() == TransactionsModel::Internal;
+
+    if( internal )
+    {
+        UniMap fieldsDataCopy = fieldsData;
+
+        // Source account transaction
+        fieldsDataCopy.insert( "type", TransactionsModel::Outgoing );
+        fieldsDataCopy.remove( "destination_account_id" );
+        ok = this->getTransactionsModel()->addRecord( fieldsDataCopy );
+
+        // Destination account transaction
+        fieldsDataCopy.insert( "type", TransactionsModel::Incoming );
+        fieldsDataCopy.insert( "destination_account_id", destinationAccountId );
+        fieldsDataCopy.remove( "source_account_id" );
+        ok &= this->getTransactionsModel()->addRecord( fieldsDataCopy );
+
+        if( !ok )
+        {
+            QMessageBox::warning(
+                this->mainWindow,
+                tr( "Save transaction data" ),
+                tr( "Internal error occurred, please see log file for details." )
+            );
+        }
+    }
+    else if( fieldsData.contains( "transaction_subitems" ) )
     {
         QList<QVariantList> subitems = fieldsData.value( "transaction_subitems" ).value<QList<QVariantList>>();
         TransactionItemsModel* transactionItemsModel = this->getTransactionItemsModel();
 
         for( const QVariantList& rowData : subitems )
         {
+            QString name = rowData.at( 0 ).toString();
+
             bool added = transactionItemsModel->addRecord({
                 { "transaction_id", transactionId },
-                { "name",           rowData.at( 0 ) },
+                { "name",           name },
                 { "category_id",    rowData.at( 1 ) },
                 { "amount",         rowData.at( 2 ) }
             });
@@ -119,22 +164,25 @@ void MainController::addTransaction( const UniMap& fieldsData )
                 QMessageBox::warning(
                     this->mainWindow,
                     tr( "Save transaction data" ),
-                    tr( "Internal error - can't save item \"%1\", please see log file for details." ).arg(
-                        rowData.at( 0 ).toString()
-                    )
+                    tr( "Internal error - can't save item \"%1\", please see log file for details." ).arg( name )
                 );
             }
         }
     }
 
-    if( !ok )
+    QDateTime transactionDate = QDateTime::fromString( fieldsData.value( "date" ).toString(), Qt::ISODate );
+
+    if( sourceAccountId )
     {
-        QMessageBox::warning(
-            this->mainWindow,
-            tr( "Save transaction data" ),
-            tr( "Internal error occurred, please see log file for details." )
-        );
+        this->recalculateAccountBalance( transactionDate, sourceAccountId );
     }
+
+    if( destinationAccountId )
+    {
+        this->recalculateAccountBalance( transactionDate, destinationAccountId );
+    }
+
+    this->showAccountsStatus();
 
     AppLogger->funcDone( "MainController::addTransaction" );
 }
@@ -206,7 +254,11 @@ void MainController::addOrUpdateAccount( const UniMap& fieldsData )
             tr( "Save account data" ),
             tr( "Internal error occurred, please see log file for details." )
         );
+
+        return;
     }
+
+    this->showAccountsStatus();
 
     AppLogger->funcDone( "MainController::addOrUpdateAccount" );
 }
@@ -228,7 +280,7 @@ void MainController::showEditAccount()
     }
 
     int selectedRow = this->accountsListDialog->getSelectedRow();
-    this->editAccountDialog->setValues( this->getAccountsModel()->getRecordsMapped( selectedRow ) );
+    this->editAccountDialog->setValues( this->getAccountsModel()->getRecordMapped( selectedRow ) );
     this->editAccountDialog->show();
 
     AppLogger->funcDone( "MainController::showEditAccount" );
@@ -476,4 +528,105 @@ void MainController::preloadModels()
 
     this->getAccountsModel();
     this->getTransactionsModel();
+}
+
+
+void MainController::showAccountsStatus()
+{
+    QSqlQueryModel* accountsStatusModel = new QSqlQueryModel( this->mainWindow );
+
+    accountsStatusModel->setQuery(
+        "SELECT \
+            a.name AS \"Account name\", \
+            CASE WHEN t.balance_after <> 0 THEN t.balance_after / 100.0 ELSE a.initial_balance / 100.0 END AS \"Current balance\", \
+            a.currency AS \"Currency\" \
+        FROM \
+            accounts a \
+        LEFT JOIN (SELECT * FROM transactions ORDER BY date ASC) t \
+            ON t.source_account_id = a.id OR t.destination_account_id = a.id \
+        GROUP BY a.id \
+        ORDER BY a.id ASC",
+        DatabaseManager::getInstance()->getDatabase()
+    );
+
+    this->mainWindow->setAccountsStatusModel( accountsStatusModel );
+}
+
+
+void MainController::recalculateAccountBalance( const QDateTime& fromDate, int accountId )
+{
+    AppLogger->funcStart( "MainController::recalculateBalance", {
+        { "fromDate", fromDate.toString( Qt::ISODate ) },
+        { "accountId", accountId }
+    } );
+
+    TransactionsModel* transactionsModel = this->getTransactionsModel();
+    QList<UniMap> rowsToChange;
+
+    for( int row = transactionsModel->rowCount() - 1; row >= 0; --row )
+    {
+        UniMap rowData = transactionsModel->getRecordMapped( row );
+
+        QDateTime rowDate = QDateTime::fromString( rowData.value( "date" ).toString(), Qt::ISODate );
+        bool prepared = rowData.value( "prepared" ).toBool();
+        bool internal = rowData.value( "type" ).toInt() == TransactionsModel::Internal;
+        int rowSourceAccount = rowData.value( "source_account_id" ).toInt();
+        int rowDestinationAccount = rowData.value( "destination_account_id" ).toInt();
+
+        if( !internal && !prepared && (rowSourceAccount == accountId || rowDestinationAccount == accountId) )
+        {
+            rowsToChange.prepend( rowData );
+
+            if( rowDate < fromDate )
+            {
+                break;
+            }
+        }
+    }
+
+    UniMap firstRowData;
+    QDateTime firstRowDate;
+    int balance;
+
+    if( rowsToChange.count() )
+    {
+        firstRowData = rowsToChange.first();
+        firstRowDate = QDateTime::fromString( firstRowData.value( "date" ).toString(), Qt::ISODate );
+    }
+    else
+    {
+        firstRowDate = QDateTime::currentDateTime();
+    }
+
+    if( firstRowDate < fromDate )
+    {
+        balance = firstRowData.value( "balance_after" ).toInt();
+        rowsToChange.removeAt( 0 );
+    }
+    else // First transaction
+    {
+        UniMap accountData = AccountsModel::getById( accountId, DatabaseManager::getInstance()->getDatabase() );
+        balance = accountData.value( "initial_balance" ).toInt();
+    }
+
+    for( UniMap rowData : rowsToChange )
+    {
+        if( rowData.value( "source_account_id" ).toInt() == accountId )
+        {
+            balance -= rowData.value( "amount" ).toInt();
+        }
+        else if( rowData.value( "destination_account_id" ).toInt() == accountId )
+        {
+            balance += rowData.value( "amount" ).toInt();
+        }
+        else
+        {
+            continue;
+        }
+
+        rowData.insert( "balance_after", balance );
+        transactionsModel->updateRecord( rowData );
+    }
+
+    AppLogger->funcDone( "MainController::recalculateBalance" );
 }
