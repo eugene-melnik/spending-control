@@ -73,6 +73,8 @@ class MainController : public QObject
 
         void preloadModels();
         void showAccountsStatus();
+        void showTotalBalance();
+        void showLastTransactions();
 
         void recalculateAccountBalance( const QDateTime& fromDate, int accountId );
 

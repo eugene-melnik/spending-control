@@ -50,6 +50,25 @@ void MainWindow::setAccountsStatusModel( QAbstractItemModel* model )
 }
 
 
+void MainWindow::setLastTransactionsModel( QAbstractItemModel* model )
+{
+    QAbstractItemModel* currentModel = this->tvTransactions->model();
+
+    if( currentModel != nullptr )
+    {
+        delete currentModel;
+    }
+
+    this->tvTransactions->setModel( model );
+}
+
+
+void MainWindow::setTotalBalance( const QString& value )
+{
+    this->lCurrentlyAvailable->setText( value );
+}
+
+
 void MainWindow::resetAccountsStatusData()
 {
     this->tvAccountsStatus->reset();

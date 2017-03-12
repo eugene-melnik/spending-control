@@ -47,6 +47,8 @@ MainController::MainController( QApplication& app )
     this->preloadModels();
 
     this->showAccountsStatus();
+    this->showTotalBalance();
+    this->showLastTransactions();
 
     this->mainWindow->show();
 
@@ -183,6 +185,8 @@ void MainController::addTransaction( const UniMap& fieldsData )
     }
 
     this->showAccountsStatus();
+    this->showTotalBalance();
+    this->showLastTransactions();
 
     AppLogger->funcDone( "MainController::addTransaction" );
 }
@@ -259,6 +263,8 @@ void MainController::addOrUpdateAccount( const UniMap& fieldsData )
     }
 
     this->showAccountsStatus();
+    this->showTotalBalance();
+    this->showLastTransactions();
 
     AppLogger->funcDone( "MainController::addOrUpdateAccount" );
 }
@@ -538,7 +544,11 @@ void MainController::showAccountsStatus()
     accountsStatusModel->setQuery(
         "SELECT \
             a.name AS \"Account name\", \
-            CASE WHEN t.balance_after <> 0 THEN t.balance_after / 100.0 ELSE a.initial_balance / 100.0 END AS \"Current balance\", \
+            CASE WHEN t.balance_after <> 0 THEN \
+                printf('%.2f', t.balance_after / 100.0) \
+            ELSE \
+                printf('%.2f', a.initial_balance) / 100.0 \
+            END AS \"Current balance\", \
             a.currency AS \"Currency\" \
         FROM \
             accounts a \
@@ -550,6 +560,64 @@ void MainController::showAccountsStatus()
     );
 
     this->mainWindow->setAccountsStatusModel( accountsStatusModel );
+}
+
+
+void MainController::showTotalBalance()
+{
+    QSqlQuery query(
+        "SELECT \
+            printf('%.2f', SUM(current_balance / 100.0)) AS \"Total balance\" \
+        FROM \
+            (SELECT \
+                CASE WHEN t.balance_after <> 0 THEN \
+                    t.balance_after \
+                ELSE \
+                    a.initial_balance \
+                END AS \"current_balance\" \
+            FROM \
+                accounts a \
+            LEFT JOIN (SELECT * FROM transactions ORDER BY date ASC) t \
+                ON t.source_account_id = a.id OR t.destination_account_id = a.id \
+            GROUP BY a.id \
+            ORDER BY a.id ASC \
+        )",
+        DatabaseManager::getInstance()->getDatabase()
+    );
+
+    query.first();
+
+    this->mainWindow->setTotalBalance( query.value( 0 ).toString() );
+}
+
+
+void MainController::showLastTransactions()
+{
+    QSqlQueryModel* lastTransactionsModel = new QSqlQueryModel( this->mainWindow );
+
+    lastTransactionsModel->setQuery(
+        "SELECT \
+            printf('%.2f', t.amount / 100.0) || ' UAH' AS \"Amount\", \
+            strftime('%d.%m.%Y %H:%m', t.date) AS \"Date\", \
+            CASE WHEN COUNT(ti.id) > 0 THEN \
+                GROUP_CONCAT(ti.name, ', ') \
+            ELSE \
+                t.notes \
+            END AS \"Description\" \
+        FROM \
+            transactions t \
+        LEFT JOIN \
+            transaction_items ti ON t.id = ti.transaction_id \
+        WHERE \
+            (SELECT COUNT(id) FROM transactions WHERE date = t.date) <> 3 \
+        GROUP BY \
+            t.id \
+        ORDER BY \
+            t.date DESC",
+        DatabaseManager::getInstance()->getDatabase()
+    );
+
+    this->mainWindow->setLastTransactionsModel( lastTransactionsModel );
 }
 
 
