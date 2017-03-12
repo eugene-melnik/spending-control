@@ -27,7 +27,6 @@
 DatabaseMigration::DatabaseMigration( QSqlDatabase database )
 {
     this->database = database;
-    this->setupMigrations();
 }
 
 
@@ -56,6 +55,8 @@ bool DatabaseMigration::migrateToVersion( int version )
         return( true );
     }
 
+    this->setupMigrationsList();
+
     this->error.clear();
     this->database.transaction();
 
@@ -72,6 +73,8 @@ bool DatabaseMigration::migrateToVersion( int version )
             {
                 this->database.rollback();
 
+                this->clearMigrationsList();
+
                 this->error = QString( "[migration %1, part \"%2\"] %3" ).arg(
                     QString::number( currentVersion ),
                     simplifiedQuery,
@@ -82,6 +85,8 @@ bool DatabaseMigration::migrateToVersion( int version )
             }
         }
     };
+
+    this->clearMigrationsList();
 
     if( !this->updateMigrationVersion( version ) )
     {
@@ -102,7 +107,7 @@ QString DatabaseMigration::getLastError() const
 }
 
 
-void DatabaseMigration::setupMigrations()
+void DatabaseMigration::setupMigrationsList()
 {
     /*
      * Create empty 'service' table and add initial 'migration_version' value.
@@ -195,6 +200,141 @@ void DatabaseMigration::setupMigrations()
             "CREATE INDEX transaction_items_category_id_idx ON transaction_items(category_id);"
         }
     );
+
+    /*
+     * Add type for categories.
+     * Update root category.
+     */
+    this->migrationsList.insert(
+        4,
+        {
+            "ALTER TABLE categories ADD COLUMN `type` INTEGER NOT NULL DEFAULT '0';",
+            "UPDATE categories SET name = '<All>', type = 0 WHERE id = 1;"
+        }
+    );
+
+    /*
+     * Create default categories structure.
+     */
+    this->migrationsList.insert(
+        5,
+        {
+            "INSERT INTO categories (id, parent_category_id, type, name) VALUES \
+            (2, 1, 1, 'Car'), \
+                (3, 2, 1, 'Fuel'), \
+                (4, 2, 1, 'Repair'), \
+                (5, 2, 1, 'Taxes'), \
+            (6, 1, 0, 'Bank'), \
+                (7, 6, 1, 'Comission'), \
+                (8, 6, 1, 'Service charge'), \
+                (9, 6, 1, 'Credit usage fee'), \
+                (10, 6, 1, 'Mortgage payments'), \
+                (11, 6, 2, 'Interest on deposit'), \
+            (12, 1, 1, 'Charitable donations'), \
+            (13, 1, 1, 'Household appliances'), \
+            (14, 1, 2, 'Repayment of borrowed money'), \
+            (15, 1, 1, 'Children'), \
+                (16, 15, 1, 'Food'), \
+                (17, 15, 1, 'Toys'), \
+                (18, 15, 1, 'Education'), \
+            (19, 1, 1, 'Pets'), \
+                (20, 19, 1, 'Toys'), \
+                (21, 19, 1, 'Nutrition'), \
+                (22, 19, 1, 'Accessories'), \
+                (23, 19, 1, 'Medicine'), \
+                (24, 19, 1, 'Veterinary'), \
+            (25, 1, 1, 'Leisure'), \
+                (26, 25, 1, 'Restaurants and cafes'), \
+                (27, 25, 1, 'Entertainment'), \
+                    (28, 27, 1, 'Theater'), \
+                    (29, 27, 1, 'Cinema'), \
+                    (30, 27, 1, 'Cultural events'), \
+                    (31, 27, 1, 'Sport events'), \
+                (32, 25, 1, 'Music and video'), \
+                (33, 25, 1, 'Games'), \
+                    (34, 33, 1, 'Board games'), \
+                    (35, 33, 1, 'Computer games'), \
+            (36, 1, 2, 'Income from investments'), \
+                (37, 36, 2, 'Capital gains'), \
+                (38, 36, 2, 'Dividends'), \
+                (39, 36, 2, 'Interest'), \
+            (40, 1, 2, 'Other incomes'), \
+                (41, 40, 2, 'Lottery'), \
+                (42, 40, 2, 'Child benefits'), \
+                (43, 40, 2, 'Unemployment compensation'), \
+            (44, 1, 0, 'Miscellaneous'), \
+            (45, 1, 2, 'Salary'), \
+                (46, 45, 2, 'Bonuses'), \
+                (47, 45, 2, 'Overtime'), \
+            (48, 1, 1, 'Healthcare'), \
+                (49, 48, 1, 'Hospital'), \
+                (50, 48, 1, 'Stomatology'), \
+                (51, 48, 1, 'Eye care'), \
+                (52, 48, 1, 'Medicine'), \
+                (53, 48, 1, 'Gym'), \
+                (54, 48, 1, 'Sporting goods'), \
+            (55, 1, 1, 'Cosmetics'), \
+            (56, 1, 1, 'Personal hygiene'), \
+            (57, 1, 1, 'Furniture'), \
+            (58, 1, 1, 'Non-grocery goods'), \
+            (59, 1, 1, 'Education'), \
+                (60, 59, 1, 'Books'), \
+                (61, 59, 1, 'Courses'), \
+            (62, 1, 2, 'Selling of own things'), \
+            (63, 1, 1, 'Public transport'), \
+                (64, 63, 1, 'Bus'), \
+                (65, 63, 1, 'Metro (Underground/Subway)'), \
+                (66, 63, 1, 'Train'), \
+                (67, 63, 1, 'Taxi'), \
+            (68, 1, 1, 'Closing'), \
+                (69, 68, 1, 'Outerwear'), \
+                (70, 68, 1, 'Underwear'), \
+                (71, 68, 1, 'Shoes'), \
+            (72, 1, 0, 'Borrowed money'), \
+            (73, 1, 1, 'Pension'), \
+            (74, 1, 0, 'Gifts'), \
+            (75, 1, 1, 'Food'), \
+                (76, 75, 1, 'Vegetables'), \
+                (77, 75, 1, 'Fruits'), \
+                (78, 75, 1, 'Mushrooms'), \
+                (79, 75, 1, 'Meat'), \
+                (80, 75, 1, 'Fish'), \
+                (81, 75, 1, 'Beverages'), \
+                (82, 75, 1, 'Snacks'), \
+                (83, 75, 1, 'Bakery products'), \
+                (84, 75, 1, 'Cheese'), \
+            (85, 1, 1, 'Traveling'), \
+                (86, 85, 1, 'Lodging'), \
+                (87, 85, 1, 'Travel'), \
+                (88, 85, 1, 'Flight'), \
+            (89, 1, 1, 'Expenses for work'), \
+            (90, 1, 2, 'Stipend'), \
+            (91, 1, 1, 'Insurance'), \
+                (92, 91, 1, 'Health'), \
+                (93, 91, 1, 'Life'), \
+                (94, 91, 1, 'Auto'), \
+                (95, 91, 1, 'Property'), \
+            (96, 1, 1, 'Bills'), \
+                (97, 95, 1, 'House rental'), \
+                (98, 95, 1, 'Utilities'), \
+                    (99, 97, 1, 'Water'), \
+                    (100, 97, 1, 'Sewage'), \
+                    (101, 97, 1, 'Gas'), \
+                    (102, 97, 1, 'Electricity'), \
+                (103, 95, 1, 'Garbage and recycling'), \
+                (104, 95, 1, 'Cell phone'), \
+                (105, 95, 1, 'Telephone'), \
+                (106, 95, 1, 'Internet'), \
+                (107, 95, 1, 'Newspapers and magazines'), \
+            (108, 1, 1, 'Electronics');"
+        }
+    );
+}
+
+
+void DatabaseMigration::clearMigrationsList()
+{
+    this->migrationsList.clear();
 }
 
 

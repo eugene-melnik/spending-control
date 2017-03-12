@@ -53,7 +53,7 @@ QVariantList CategoriesModel::getRecord( int row ) const
 
         query.prepare(
             "SELECT id, name, description, parent_category_id, system \
-            FROM categories WHERE deleted_at IS NULL ORDER BY name ASC LIMIT ? OFFSET ?;"
+            FROM categories WHERE deleted_at IS NULL ORDER BY id ASC LIMIT ? OFFSET ?;"
         );
 
         query.bindValue( 0, 1 );

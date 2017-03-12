@@ -42,12 +42,12 @@ namespace Application
       // Versions
     const quint8  verMajor = 0;
     const quint8  verMinor = 1;
-    const quint8  verFix = 0;
+    const quint8  verFix = 1;
 
     const QString appVersionFull = QString( "%1.%2.%3" ).arg( verMajor ).arg( verMinor ).arg( verFix );
     const QString appBuildDate = QString( __DATE__ );
 
-    const quint8  databaseVersion = 3;
+    const quint8  databaseVersion = 5;
 
     const quint8 settingsVersion = 1;
 

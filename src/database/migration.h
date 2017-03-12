@@ -39,7 +39,9 @@ class DatabaseMigration
         QString getLastError() const;
 
     protected:
-        void setupMigrations();
+        void setupMigrationsList();
+        void clearMigrationsList();
+
         bool updateMigrationVersion( int version );
 
         QMap<int,QStringList> migrationsList;
