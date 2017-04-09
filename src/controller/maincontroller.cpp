@@ -598,7 +598,8 @@ void MainController::showLastTransactions()
     lastTransactionsModel->setQuery(
         "SELECT \
             printf('%.2f', t.amount / 100.0) || ' UAH' AS \"Amount\", \
-            strftime('%d.%m.%Y %H:%m', t.date) AS \"Date\", \
+            strftime('%d.%m.%Y %H:%M', t.date) AS \"Date\", \
+            a.name AS \"Source account\", \
             CASE WHEN COUNT(ti.id) > 0 THEN \
                 GROUP_CONCAT(ti.name, ', ') \
             ELSE \
@@ -607,7 +608,8 @@ void MainController::showLastTransactions()
         FROM \
             transactions t \
         LEFT JOIN \
-            transaction_items ti ON t.id = ti.transaction_id \
+            transaction_items ti ON t.id = ti.transaction_id, \
+            accounts a ON a.id = t.source_account_id \
         WHERE \
             (SELECT COUNT(id) FROM transactions WHERE date = t.date) <> 3 \
         GROUP BY \

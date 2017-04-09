@@ -277,56 +277,61 @@ void DatabaseMigration::setupMigrationsList()
             (56, 1, 1, 'Personal hygiene'), \
             (57, 1, 1, 'Furniture'), \
             (58, 1, 1, 'Non-grocery goods'), \
-            (59, 1, 1, 'Education'), \
-                (60, 59, 1, 'Books'), \
-                (61, 59, 1, 'Courses'), \
-            (62, 1, 2, 'Selling of own things'), \
-            (63, 1, 1, 'Public transport'), \
-                (64, 63, 1, 'Bus'), \
-                (65, 63, 1, 'Metro (Underground/Subway)'), \
-                (66, 63, 1, 'Train'), \
-                (67, 63, 1, 'Taxi'), \
-            (68, 1, 1, 'Closing'), \
-                (69, 68, 1, 'Outerwear'), \
-                (70, 68, 1, 'Underwear'), \
-                (71, 68, 1, 'Shoes'), \
-            (72, 1, 0, 'Borrowed money'), \
-            (73, 1, 1, 'Pension'), \
-            (74, 1, 0, 'Gifts'), \
-            (75, 1, 1, 'Food'), \
-                (76, 75, 1, 'Vegetables'), \
-                (77, 75, 1, 'Fruits'), \
-                (78, 75, 1, 'Mushrooms'), \
-                (79, 75, 1, 'Meat'), \
-                (80, 75, 1, 'Fish'), \
-                (81, 75, 1, 'Beverages'), \
-                (82, 75, 1, 'Snacks'), \
-                (83, 75, 1, 'Bakery products'), \
-                (84, 75, 1, 'Cheese'), \
-            (85, 1, 1, 'Traveling'), \
-                (86, 85, 1, 'Lodging'), \
-                (87, 85, 1, 'Travel'), \
-                (88, 85, 1, 'Flight'), \
-            (89, 1, 1, 'Expenses for work'), \
-            (90, 1, 2, 'Stipend'), \
-            (91, 1, 1, 'Insurance'), \
-                (92, 91, 1, 'Health'), \
-                (93, 91, 1, 'Life'), \
-                (94, 91, 1, 'Auto'), \
-                (95, 91, 1, 'Property'), \
-            (96, 1, 1, 'Bills'), \
-                (97, 95, 1, 'House rental'), \
-                (98, 95, 1, 'Utilities'), \
-                    (99, 97, 1, 'Water'), \
-                    (100, 97, 1, 'Sewage'), \
-                    (101, 97, 1, 'Gas'), \
-                    (102, 97, 1, 'Electricity'), \
-                (103, 95, 1, 'Garbage and recycling'), \
-                (104, 95, 1, 'Cell phone'), \
-                (105, 95, 1, 'Telephone'), \
-                (106, 95, 1, 'Internet'), \
-                (107, 95, 1, 'Newspapers and magazines'), \
-            (108, 1, 1, 'Electronics');"
+                (59, 58, 1, 'Stationery'), \
+            (60, 1, 1, 'Smoking'), \
+            (61, 1, 1, 'Education'), \
+                (62, 61, 1, 'Books'), \
+                (63, 61, 1, 'Courses'), \
+            (64, 1, 2, 'Selling of own things'), \
+            (65, 1, 1, 'Public transport'), \
+                (66, 65, 1, 'Bus'), \
+                (67, 65, 1, 'Metro (Underground/Subway)'), \
+                (68, 65, 1, 'Train'), \
+                (69, 65, 1, 'Taxi'), \
+            (70, 1, 1, 'Closing'), \
+                (71, 70, 1, 'Outerwear'), \
+                (72, 70, 1, 'Underwear'), \
+                (73, 70, 1, 'Shoes'), \
+            (74, 1, 0, 'Borrowed money'), \
+            (75, 1, 1, 'Pension'), \
+            (76, 1, 0, 'Gifts'), \
+            (77, 1, 1, 'Food'), \
+                (78, 77, 1, 'Vegetables'), \
+                (79, 77, 1, 'Fruits'), \
+                (80, 77, 1, 'Mushrooms'), \
+                (81, 77, 1, 'Meat'), \
+                (82, 77, 1, 'Fish'), \
+                (83, 77, 1, 'Beverages'), \
+                (84, 77, 1, 'Alcohol'), \
+                (85, 77, 1, 'Snacks'), \
+                (86, 77, 1, 'Bakery products'), \
+                (87, 77, 1, 'Cheese'), \
+                (88, 77, 1, 'Sauce'), \
+                (89, 77, 1, 'Condiment'), \
+            (90, 1, 1, 'Traveling'), \
+                (91, 90, 1, 'Lodging'), \
+                (92, 90, 1, 'Travel'), \
+                (93, 90, 1, 'Flight'), \
+            (94, 1, 1, 'Expenses for work'), \
+            (95, 1, 2, 'Stipend'), \
+            (96, 1, 1, 'Insurance'), \
+                (97, 96, 1, 'Health'), \
+                (98, 96, 1, 'Life'), \
+                (99, 96, 1, 'Auto'), \
+                (100, 96, 1, 'Property'), \
+            (101, 1, 1, 'Bills'), \
+                (102, 101, 1, 'House rental'), \
+                (103, 101, 1, 'Utilities'), \
+                    (104, 103, 1, 'Water'), \
+                    (105, 103, 1, 'Sewage'), \
+                    (106, 103, 1, 'Gas'), \
+                    (107, 103, 1, 'Electricity'), \
+                (108, 101, 1, 'Garbage and recycling'), \
+                (109, 101, 1, 'Cell phone'), \
+                (110, 101, 1, 'Telephone'), \
+                (111, 101, 1, 'Internet'), \
+                (112, 101, 1, 'Newspapers and magazines'), \
+            (113, 1, 1, 'Electronics');"
         }
     );
 }
