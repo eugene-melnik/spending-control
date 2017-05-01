@@ -43,6 +43,7 @@ HEADERS += \
     tool/commandlineparser.h \
     tool/logger.h \
     tool/settings.h \
+    widget/treecombobox.h \
     window/accountslistdialog.h \
     window/addaccountdialog.h \
     window/addtransactiondialog.h \
@@ -52,14 +53,13 @@ HEADERS += \
     defines.h \
     types.h \
     version.h \
-    delegate/comboboxdelegate.h
+    delegate/treecomboboxdelegate.h
 
 SOURCES += \
     controller/maincontroller.cpp \
     database/manager.cpp \
     database/migration.cpp \
     database/query.cpp \
-    delegate/doublespinboxdelegate.cpp \
     model/accountsmodel.cpp \
     model/categoriesmodel.cpp \
     model/transactionsmodel.cpp \
@@ -67,14 +67,14 @@ SOURCES += \
     tool/commandlineparser.cpp \
     tool/logger.cpp \
     tool/settings.cpp \
+    widget/treecombobox.cpp \
     window/accountslistdialog.cpp \
     window/addaccountdialog.cpp \
     window/addtransactiondialog.cpp \
     window/editaccountdialog.cpp \
     window/edittransactiondialog.cpp \
     window/mainwindow.cpp \
-    main.cpp \
-    delegate/comboboxdelegate.cpp
+    main.cpp
 
 FORMS += \
     window/accountslistdialog.ui \

@@ -1,6 +1,6 @@
 /*************************************************************************************************
  *                                                                                                *
- *  file: edittransactiondialog.h                                                                 *
+ *  file: treecombobox.cpp                                                                        *
  *                                                                                                *
  *  SpendingControl                                                                               *
  *  Copyright (C) 2017 Eugene Melnik <jeka7js@gmail.com>                                          *
@@ -18,63 +18,57 @@
  *                                                                                                *
   *************************************************************************************************/
 
-#ifndef EDIT_TRANSACTION_DIALOG_H
-#define EDIT_TRANSACTION_DIALOG_H
+#include "treecombobox.h"
 
-#include <QDialog>
-
-#include "delegate/treecomboboxdelegate.h"
-#include "delegate/doublespinboxdelegate.h"
-#include "types.h"
-#include "ui_edittransactiondialog.h"
+#include <QTreeView>
 
 
-class EditTransactionDialog : public QDialog, protected Ui::EditTransactionDialog
+TreeComboBox::TreeComboBox( QWidget* parent )
+  : QComboBox( parent )
 {
-    Q_OBJECT
+    QTreeView* treeView = new QTreeView( this );
+    treeView->setHeaderHidden( true );
+    treeView->setItemsExpandable( false );
+    treeView->setMinimumWidth( 250 );
 
-    public:
-        explicit EditTransactionDialog( QWidget* parent = nullptr );
-        ~EditTransactionDialog();
-
-        void setAccountsList( const UniMap& accounts );
-        void setCategoriesList( const UniMap& categories );
-
-        void setValues( const UniMap& fieldsData );
-
-    signals:
-        void saveData( UniMap fieldsData );
-
-    protected slots:
-        void setCurrentDate();
-        void changeType();
-        void clearPageValues( int page );
-
-        void createSubitem();
-        void deleteSubitem();
-
-        void recalculateSubitemsAmount( int changedRow, int changedColumn );
-
-    protected:
-        void setupSubitemsWidget();
-
-        int getCurrentType() const;
-        UniMap getCurrentPageValues() const;
-
-        void okClicked();
-
-        enum SubitemColumn
-        {
-            Name,
-            CategoryId,
-            Amount
-        };
-
-        int transactionId = 0;
-
-        TreeComboBoxDelegate* subitemCategoryDelegare = nullptr;
-        DoubleSpinboxDelegate* subitemAmountDelegate = nullptr;
-};
+    delete this->view();
+    this->setView( treeView );
+}
 
 
-#endif // EDIT_TRANSACTION_DIALOG_H
+void TreeComboBox::setModel( QAbstractItemModel* model )
+{
+    QComboBox::setModel( model );
+
+    this->setRootModelIndex( QModelIndex() );
+
+    this->view()->selectionModel()->setCurrentIndex(
+        model->index( 0, 0 ),
+        QItemSelectionModel::SelectCurrent
+    );
+}
+
+
+void TreeComboBox::hideColumn( int columnIndex )
+{
+    QTreeView* view = static_cast<QTreeView*>( this->view() );
+    view->hideColumn( columnIndex );
+}
+
+
+QModelIndex TreeComboBox::currentIndex() const
+{
+    QTreeView* view = static_cast<QTreeView*>( this->view() );
+    return( view->currentIndex() );
+}
+
+
+void TreeComboBox::showPopup()
+{
+    this->setRootModelIndex( QModelIndex() );
+
+    QTreeView* view = static_cast<QTreeView*>( this->view() );
+    view->expandAll();
+
+    QComboBox::showPopup();
+}

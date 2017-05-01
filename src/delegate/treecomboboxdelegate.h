@@ -1,6 +1,6 @@
 /*************************************************************************************************
  *                                                                                                *
- *  file: doublespinboxdelegate.h                                                                 *
+ *  file: treecomboboxdelegate.h                                                                  *
  *                                                                                                *
  *  SpendingControl                                                                               *
  *  Copyright (C) 2017 Eugene Melnik <jeka7js@gmail.com>                                          *
@@ -18,46 +18,87 @@
  *                                                                                                *
   *************************************************************************************************/
 
-#ifndef DOUBLE_SPINBOX_DELEGATE_H
-#define DOUBLE_SPINBOX_DELEGATE_H
+#ifndef TREE_COMBO_BOX_DELEGATE_H
+#define TREE_COMBO_BOX_DELEGATE_H
 
-#include <QDoubleSpinBox>
+#include <QAbstractItemModel>
 #include <QStyledItemDelegate>
 
+#include "widget/treecombobox.h"
+#include "types.h"
 
-class DoubleSpinboxDelegate : public QStyledItemDelegate
+
+class TreeComboBoxDelegate : public QStyledItemDelegate
 {
     Q_OBJECT
 
     public:
-        explicit DoubleSpinboxDelegate( QObject* parent = nullptr ) : QStyledItemDelegate( parent ) {}
+        explicit TreeComboBoxDelegate( QObject* parent = nullptr )
+            : QStyledItemDelegate( parent ) {}
 
-        QWidget* createEditor( QWidget* parent, const QStyleOptionViewItem& /*option*/, const QModelIndex& /*index*/ ) const override
+        void setModel( QAbstractItemModel* model )
         {
-            QDoubleSpinBox* editor = new QDoubleSpinBox( parent );
-            editor->setFrame( false );
-            editor->setRange( 0.0, 10000000.0 );
-            editor->setDecimals( 2 );
+            if( this->model != nullptr )
+            {
+                delete this->model;
+            }
+
+            this->model = model;
+        }
+
+        void setDataColumn( int column )
+        {
+            this->dataColumn = column;
+        }
+
+        void hideColumns( const QList<int>& columns )
+        {
+            this->hiddenColumns = columns;
+        }
+
+        QWidget* createEditor( QWidget* parent, const QStyleOptionViewItem& /*option*/, const QModelIndex& /*index*/) const override
+        {
+            TreeComboBox* editor = new TreeComboBox( parent );
+            editor->setModel( this->model );
+
+            if( this->hiddenColumns.count() > 0)
+            {
+                for( int column : this->hiddenColumns )
+                {
+                    editor->hideColumn( column );
+                }
+            }
+
             return( editor );
         }
 
         void setEditorData( QWidget* editor, const QModelIndex& index ) const override
         {
-            QDoubleSpinBox* spinBox = static_cast<QDoubleSpinBox*>( editor );
-            spinBox->setValue( index.model()->data( index, Qt::EditRole ).toDouble() );
+            TreeComboBox* comboBox = static_cast<TreeComboBox*>( editor );
+            QString a = index.data( Qt::EditRole ).toString();
+            comboBox->setCurrentText( index.data( Qt::EditRole ).toString() );
         }
 
         void setModelData( QWidget* editor, QAbstractItemModel* model, const QModelIndex& index ) const override
         {
-            QDoubleSpinBox* spinBox = static_cast<QDoubleSpinBox*>( editor );
-            model->setData( index, spinBox->value(), Qt::EditRole );
+            TreeComboBox* comboBox = static_cast<TreeComboBox*>( editor );
+            model->setData( index, comboBox->currentText(), Qt::EditRole );
+
+            int selectedRow = comboBox->currentIndex().row();
+            QModelIndex dataIndex = comboBox->model()->index( selectedRow, this->dataColumn );
+            model->setData( index, comboBox->model()->data( dataIndex ), Qt::UserRole );
         }
 
         void updateEditorGeometry( QWidget* editor, const QStyleOptionViewItem& option, const QModelIndex& /*index*/ ) const override
         {
             editor->setGeometry( option.rect );
         }
+
+    protected:
+        QAbstractItemModel* model = nullptr;
+        QList<int> hiddenColumns;
+        int dataColumn = 0;
 };
 
 
-#endif // DOUBLE_SPINBOX_DELEGATE_H
+#endif // TREE_COMBO_BOX_DELEGATE_H

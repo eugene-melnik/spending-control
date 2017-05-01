@@ -1,6 +1,6 @@
 /*************************************************************************************************
  *                                                                                                *
- *  file: doublespinboxdelegate.cpp                                                               *
+ *  file: treecombobox.h                                                                          *
  *                                                                                                *
  *  SpendingControl                                                                               *
  *  Copyright (C) 2017 Eugene Melnik <jeka7js@gmail.com>                                          *
@@ -18,38 +18,28 @@
  *                                                                                                *
   *************************************************************************************************/
 
-#include "doublespinboxdelegate.h"
+#ifndef TREE_COMBO_BOX_H
+#define TREE_COMBO_BOX_H
 
-#include <QDoubleSpinBox>
+#include <QComboBox>
 
 
-QWidget* DoubleSpinboxDelegate::createEditor( QWidget* parent, const QStyleOptionViewItem&, const QModelIndex& ) const
+class TreeComboBox : public QComboBox
 {
-    QDoubleSpinBox* editor = new QDoubleSpinBox( parent );
+    Q_OBJECT
 
-    editor->setFrame( false );
-    editor->setRange( 0.0, 10000000.0 );
-    editor->setDecimals( 2 );
+    public:
+        explicit TreeComboBox( QWidget* parent = nullptr );
 
-    return( editor );
-}
+        void setModel( QAbstractItemModel* model );
 
+        void hideColumn( int columnIndex );
 
-void DoubleSpinboxDelegate::setEditorData( QWidget* editor, const QModelIndex& index ) const
-{
-    QDoubleSpinBox* spinBox = static_cast<QDoubleSpinBox*>( editor );
-    spinBox->setValue( index.model()->data( index, Qt::EditRole ).toDouble() );
-}
+        QModelIndex currentIndex() const;
 
-
-void DoubleSpinboxDelegate::setModelData( QWidget* editor, QAbstractItemModel* model, const QModelIndex& index ) const
-{
-    QDoubleSpinBox* spinBox = static_cast<QDoubleSpinBox*>( editor );
-    model->setData( index, spinBox->value(), Qt::EditRole );
-}
+    protected:
+        void showPopup() override;
+};
 
 
-void DoubleSpinboxDelegate::updateEditorGeometry( QWidget* editor, const QStyleOptionViewItem& option, const QModelIndex& ) const
-{
-    editor->setGeometry( option.rect );
-}
+#endif // TREE_COMBO_BOX_H

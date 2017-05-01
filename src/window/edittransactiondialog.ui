@@ -242,7 +242,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QComboBox" name="cbCategoryOutgoing"/>
+            <widget class="TreeComboBox" name="cbCategoryOutgoing"/>
            </item>
           </layout>
          </item>
@@ -443,7 +443,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QComboBox" name="cbCategoryIncoming"/>
+            <widget class="TreeComboBox" name="cbCategoryIncoming"/>
            </item>
           </layout>
          </item>
@@ -586,6 +586,13 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>TreeComboBox</class>
+   <extends>QComboBox</extends>
+   <header>widget/treecombobox.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections>
   <connection>

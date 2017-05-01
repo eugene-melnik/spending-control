@@ -227,7 +227,8 @@ void EditTransactionDialog::setupSubitemsWidget()
     this->twSubitems->setColumnWidth( SubitemColumn::Name, 100 );
     this->twSubitems->setColumnWidth( SubitemColumn::CategoryId, 110 );
 
-    this->subitemCategoryDelegare = new ComboBoxDelegate();
+    this->subitemCategoryDelegare = new TreeComboBoxDelegate();
+    this->subitemCategoryDelegare->setDataColumn( CategoryTreeItem::Column::Id );
     this->twSubitems->setItemDelegateForColumn( SubitemColumn::CategoryId, this->subitemCategoryDelegare );
 
     this->subitemAmountDelegate = new DoubleSpinboxDelegate();
