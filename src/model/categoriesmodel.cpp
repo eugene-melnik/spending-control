@@ -21,22 +21,66 @@
 #include "categoriesmodel.h"
 
 
-CategoriesModel::CategoriesModel( QSqlDatabase database )
-    : database( database )
+const QMap<int,QString> CategoriesModel::typesMap = {
+    { CategoryTreeItem::Type::All,      tr( "All" ) },
+    { CategoryTreeItem::Type::Outcome,  tr( "Outcome" ) },
+    { CategoryTreeItem::Type::Income,   tr( "Income" ) },
+};
+
+
+CategoriesModel::CategoriesModel( QSqlDatabase database, QObject* parent )
+  : QAbstractItemModel( parent ),
+    database( database )
 {
-    //
+    this->loadAllData();
 }
 
 
-int CategoriesModel::rowCount() const
+CategoriesModel::~CategoriesModel()
 {
-    QSqlQuery query = this->database.exec(
-        "SELECT COUNT(*) AS categories_count FROM categories WHERE deleted_at IS NULL;"
-    );
-
-    if( query.first() )
+    if( this->rootItem != nullptr )
     {
-        return( query.value( 0 ).toInt() );
+        delete this->rootItem;
+    }
+}
+
+
+QVariant CategoriesModel::data( const QModelIndex& index, int role ) const
+{
+    if( index.isValid() && role == Qt::DisplayRole )
+    {
+        CategoryTreeItem* item = static_cast<CategoryTreeItem*>( index.internalPointer() );
+
+        switch( index.column() )
+        {
+            case CategoryTreeItem::Column::Type :
+            {
+                int type = item->data( index.column() ).toInt();
+
+                if( CategoriesModel::typesMap.contains( type ) )
+                {
+                    return( CategoriesModel::typesMap.value( type ) );
+                }
+            }
+
+            default :
+            {
+                return( item->data( index.column() ) );
+            }
+        }
+    }
+    else
+    {
+        return( QVariant() );
+    }
+}
+
+
+Qt::ItemFlags CategoriesModel::flags( const QModelIndex& index ) const
+{
+    if( index.isValid() )
+    {
+        return( QAbstractItemModel::flags( index ) );
     }
     else
     {
@@ -45,50 +89,183 @@ int CategoriesModel::rowCount() const
 }
 
 
-QVariantList CategoriesModel::getRecord( int row ) const
+QModelIndex CategoriesModel::parent( const QModelIndex& index ) const
 {
-    if( this->records.value( row ).empty() )
+    if( index.isValid() )
     {
-        QSqlQuery query( this->database );
+        CategoryTreeItem* childItem = static_cast<CategoryTreeItem*>( index.internalPointer() );
+        CategoryTreeItem* parentItem = childItem->getParentItem();
 
-        query.prepare(
-            "SELECT id, name, description, parent_category_id, system \
-            FROM categories WHERE deleted_at IS NULL ORDER BY id ASC LIMIT ? OFFSET ?;"
-        );
-
-        query.bindValue( 0, 1 );
-        query.bindValue( 1, row );
-        query.exec();
-
-        if( query.first() )
+        if( parentItem != this->rootItem )
         {
-            this->records.insert( row, {
-                query.value( Column::Id ),
-                query.value( Column::Name ),
-                query.value( Column::Description ),
-                query.value( Column::ParentCategoryId ),
-                query.value( Column::System )
-            } );
-        }
-        else
-        {
-            return( QVariantList() );
+            return this->createIndex( parentItem->row(), 0, parentItem );
         }
     }
 
-    return( this->records.value( row ) );
+    return QModelIndex();
 }
 
 
-UniMap CategoriesModel::getList() const
+QModelIndex CategoriesModel::index( int row, int column, const QModelIndex& parent ) const
 {
-    UniMap list;
-
-    for( int row = 0; row < this->rowCount(); ++row )
+    if( this->hasIndex(row, column, parent) )
     {
-        QVariantList rowData = this->getRecord( row );
-        list.insert( rowData.at( Column::Id ).toString(), rowData.at( Column::Name ) );
+        CategoryTreeItem* parentItem;
+
+        if( parent.isValid() )
+        {
+            parentItem = static_cast<CategoryTreeItem*>( parent.internalPointer() );
+        }
+        else
+        {
+            parentItem = this->rootItem;
+        }
+
+        CategoryTreeItem* childItem = parentItem->childItem( row );
+
+        if( childItem )
+        {
+            return( createIndex( row, column, childItem ) );
+        }
     }
 
-    return( list );
+    return( QModelIndex() );
+}
+
+
+int CategoriesModel::rowCount( const QModelIndex& parent ) const
+{
+    CategoryTreeItem* parentItem;
+
+    if( parent.column() <= 0 )
+    {
+        if( parent.isValid() )
+        {
+            parentItem = static_cast<CategoryTreeItem*>( parent.internalPointer() );
+        }
+        else
+        {
+            parentItem = this->rootItem;
+        }
+
+        return( parentItem->childItemsCount() );
+    }
+
+    return( 0 );
+}
+
+
+int CategoriesModel::columnCount( const QModelIndex& parent ) const
+{
+    CategoryTreeItem* item;
+
+    if( parent.isValid() )
+    {
+        item = static_cast<CategoryTreeItem*>( parent.internalPointer() );
+    }
+    else
+    {
+        item = this->rootItem;
+    }
+
+    return( item->columnsCount() );
+}
+
+
+void CategoriesModel::addFilter( CategoryTreeItem::Column column, const QVariant& value )
+{
+    this->filters.insertMulti( column, value );
+}
+
+
+void CategoriesModel::resetFilters()
+{
+    this->filters.clear();
+}
+
+
+void CategoriesModel::loadAllData()
+{
+    QVariantList rootItemData = this->getRootCategory();
+
+    if( !rootItemData.isEmpty() )
+    {
+        // root category added twice, as root item is not shown in tree view,
+        // but we need it
+        this->rootItem = new CategoryTreeItem( rootItemData );
+
+        CategoryTreeItem* mainItem = new CategoryTreeItem( rootItemData, this->rootItem );
+        this->rootItem->appendChildItem( mainItem );
+
+        this->loadSubscategories( mainItem );
+    }
+}
+
+
+void CategoriesModel::loadSubscategories( CategoryTreeItem* parentCategory )
+{
+    int parentCategoryId = parentCategory->data( CategoryTreeItem::Column::Id ).toInt();
+    QList<QVariantList> foundSubcategories = this->getSubcategories( parentCategoryId );
+
+    for( const QVariantList& categoryData : foundSubcategories )
+    {
+        CategoryTreeItem* categoryItem = new CategoryTreeItem( categoryData, parentCategory );
+        parentCategory->appendChildItem( categoryItem );
+        this->loadSubscategories( categoryItem );
+    }
+}
+
+
+QVariantList CategoriesModel::getRootCategory()
+{
+    QList<QVariantList> foundRecords = this->getSubcategories( 0 );
+
+    if( !foundRecords.isEmpty() )
+    {
+        return( this->getSubcategories( 0 ).first() );
+    }
+    else
+    {
+        return( QVariantList() );
+    }
+}
+
+
+QList<QVariantList> CategoriesModel::getSubcategories( int parentCategoryId )
+{
+    QList<QVariantList> foundRecords;
+    QSqlQuery query( this->database );
+
+    if( parentCategoryId == 0 )
+    {
+        query.prepare(
+            "SELECT name, description, id, parent_category_id, type "
+            "FROM categories WHERE deleted_at IS NULL AND parent_category_id IS NULL"
+        );
+    }
+    else
+    {
+        query.prepare(
+            "SELECT name, description, id, parent_category_id, type "
+            "FROM categories WHERE deleted_at IS NULL AND parent_category_id = ?"
+        );
+
+        query.bindValue( 0, parentCategoryId );
+    }
+
+    if( query.exec() )
+    {
+        while( query.next() )
+        {
+            foundRecords.append( {
+                query.value( CategoryTreeItem::Column::Name ),
+                query.value( CategoryTreeItem::Column::Description ),
+                query.value( CategoryTreeItem::Column::Id ),
+                query.value( CategoryTreeItem::Column::ParentCategoryId ),
+                query.value( CategoryTreeItem::Column::Type )
+            } );
+        }
+    }
+
+    return( foundRecords );
 }

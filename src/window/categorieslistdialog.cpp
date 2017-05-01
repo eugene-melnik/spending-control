@@ -1,6 +1,6 @@
 /*************************************************************************************************
  *                                                                                                *
- *  file: categoriesmodel.h                                                                       *
+ *  file: categorieslistdialog.cpp                                                                *
  *                                                                                                *
  *  SpendingControl                                                                               *
  *  Copyright (C) 2017 Eugene Melnik <jeka7js@gmail.com>                                          *
@@ -18,52 +18,29 @@
  *                                                                                                *
   *************************************************************************************************/
 
-#ifndef CATEGORIES_MODEL_H
-#define CATEGORIES_MODEL_H
+#include "categorieslistdialog.h"
 
-#include <QAbstractItemModel>
-#include <QModelIndex>
-#include <QMap>
-
-#include "categorytreeitem.h"
-#include "database/query.h"
-#include "types.h"
+#include <QFileSystemModel>
 
 
-class CategoriesModel : public QAbstractItemModel
+CategoriesListDialog::CategoriesListDialog( QWidget* parent )
+  : QDialog(parent)
 {
-    Q_OBJECT
-
-    public:
-        explicit CategoriesModel( QSqlDatabase database, QObject* parent = nullptr );
-        ~CategoriesModel();
-
-        QVariant data( const QModelIndex& index, int role ) const override;
-        Qt::ItemFlags flags( const QModelIndex& index ) const override;
-
-        QModelIndex parent( const QModelIndex& index ) const override;
-        QModelIndex index( int row, int column, const QModelIndex& parent = QModelIndex() ) const override;
-
-        int rowCount( const QModelIndex& parent = QModelIndex() ) const override;
-        int columnCount( const QModelIndex& parent = QModelIndex() ) const override;
-
-        void addFilter( CategoryTreeItem::Column column, const QVariant& value );
-        void resetFilters();
-
-    protected:
-        void loadAllData();
-        void loadSubscategories( CategoryTreeItem* parentCategory );
-        QVariantList getRootCategory();
-        QList<QVariantList> getSubcategories( int parentCategoryId );
-
-    private:
-        QMap<CategoryTreeItem::Column,QVariant> filters;
-
-        QSqlDatabase database;
-        CategoryTreeItem* rootItem = nullptr;
-
-        static const QMap<int,QString> typesMap;
-};
+    this->setupUi( this );
+}
 
 
-#endif // CATEGORIES_MODEL_H
+void CategoriesListDialog::setCategoriesModel( CategoriesModel* model )
+{
+    this->tvCategories->setModel( model );
+    this->tvCategories->setRootIndex( QModelIndex() );
+    this->tvCategories->expandAll();
+
+    this->tvCategories->setItemsExpandable( false );
+
+    this->tvCategories->hideColumn( CategoryTreeItem::Column::Id );
+    this->tvCategories->hideColumn( CategoryTreeItem::Column::ParentCategoryId );
+
+    this->tvCategories->header()->resizeSection( CategoryTreeItem::Column::Name, 200 );
+    this->tvCategories->header()->hide();
+}

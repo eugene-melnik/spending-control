@@ -27,6 +27,7 @@
 #include "model/transactionitemsmodel.h"
 #include "window/accountslistdialog.h"
 #include "window/addaccountdialog.h"
+#include "window/categorieslistdialog.h"
 #include "window/mainwindow.h"
 #include "window/addtransactiondialog.h"
 
@@ -88,6 +89,8 @@ class MainController : public QObject
         AccountsListDialog* accountsListDialog = nullptr;
         AddAccountDialog* addAccountDialog = nullptr;
         EditAccountDialog* editAccountDialog = nullptr;
+
+        CategoriesListDialog* categoriesListDialog = nullptr;
 
         /**
          * Models

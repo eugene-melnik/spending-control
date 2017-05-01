@@ -335,7 +335,21 @@ void MainController::showDeleteAccount()
 
 void MainController::showManageCategories()
 {
-    //
+    AppLogger->funcStart( "MainController::showManageCategories" );
+
+    if( this->categoriesListDialog == nullptr )
+    {
+        AppLogger->debug( "CategoriesListDialog creation..." );
+
+        this->categoriesListDialog = new CategoriesListDialog( this->mainWindow );
+        this->categoriesListDialog->setCategoriesModel( this->getCategoriesModel() );
+
+        // connect signals
+    }
+
+    this->categoriesListDialog->show();
+
+    AppLogger->funcDone( "MainController::showManageCategories" );
 }
 
 

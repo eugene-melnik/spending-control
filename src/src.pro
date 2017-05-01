@@ -47,6 +47,7 @@ HEADERS += \
     window/accountslistdialog.h \
     window/addaccountdialog.h \
     window/addtransactiondialog.h \
+    window/categorieslistdialog.h \
     window/editaccountdialog.h \
     window/edittransactiondialog.h \
     window/mainwindow.h \
@@ -71,6 +72,7 @@ SOURCES += \
     window/accountslistdialog.cpp \
     window/addaccountdialog.cpp \
     window/addtransactiondialog.cpp \
+    window/categorieslistdialog.cpp \
     window/editaccountdialog.cpp \
     window/edittransactiondialog.cpp \
     window/mainwindow.cpp \
@@ -78,6 +80,7 @@ SOURCES += \
 
 FORMS += \
     window/accountslistdialog.ui \
+    window/categorieslistdialog.ui \
     window/editaccountdialog.ui \
     window/edittransactiondialog.ui \
     window/mainwindow.ui

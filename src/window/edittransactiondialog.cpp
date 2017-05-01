@@ -18,6 +18,7 @@
  *                                                                                                *
   *************************************************************************************************/
 
+#include "model/categorytreeitem.h"
 #include "model/transactionsmodel.h"
 #include "edittransactiondialog.h"
 
