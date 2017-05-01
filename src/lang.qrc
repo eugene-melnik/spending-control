@@ -1,0 +1,11 @@
+<!DOCTYPE RCC>
+<RCC version="1.0">
+  <qresource prefix="lang">
+    <!-- Russian -->
+    <file alias="spending-control-ru_RU.qm">../lang/spending-control-ru_RU.qm</file>
+    <file alias="qt-ru_RU.qm">../lang/qt-ru_RU.qm</file>
+    <!-- Ukrainian -->
+    <file alias="spending-control-uk_UA.qm">../lang/spending-control-uk_UA.qm</file>
+    <file alias="qt-uk_UA.qm">../lang/qt-uk_UA.qm</file>
+  </qresource>
+</RCC>

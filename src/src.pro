@@ -85,12 +85,13 @@ FORMS += \
 
     # Translations #
 
-#TRANSLATIONS += 
+TRANSLATIONS += ../lang/spending-control-ru_RU.ts \
+                ../lang/spending-control-uk_UA.ts
 
 
     # Resources #
 
-#RESOURCES = 
+RESOURCES = lang.qrc
 
 
     # Debug & Release #

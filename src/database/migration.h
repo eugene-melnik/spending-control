@@ -30,7 +30,6 @@ class DatabaseMigration
 {
     public:
         DatabaseMigration( QSqlDatabase database );
-        ~DatabaseMigration() {}
 
         int getCurrentVersion() const;
 
@@ -43,6 +42,8 @@ class DatabaseMigration
         void clearMigrationsList();
 
         bool updateMigrationVersion( int version );
+
+        void translationPlaceholders();
 
         QMap<int,QStringList> migrationsList;
         QSqlDatabase database;

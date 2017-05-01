@@ -359,3 +359,130 @@ bool DatabaseMigration::updateMigrationVersion( int version )
         return( false );
     }
 }
+
+
+void DatabaseMigration::translationPlaceholders()
+{
+#ifdef QT_DEBUG
+
+    /*
+     * Strings which used in migrations and could/should be translated.
+     */
+
+    /*
+     * Default categories
+     */
+    QObject::tr("<All>");
+    QObject::tr("Car");
+    QObject::tr("Fuel");
+    QObject::tr("Repair");
+    QObject::tr("Taxes");
+    QObject::tr("Bank");
+    QObject::tr("Comission");
+    QObject::tr("Service charge");
+    QObject::tr("Credit usage fee");
+    QObject::tr("Mortgage payments");
+    QObject::tr("Interest on deposit");
+    QObject::tr("Charitable donations");
+    QObject::tr("Household appliances");
+    QObject::tr("Repayment of borrowed money");
+    QObject::tr("Children");
+    QObject::tr("Food");
+    QObject::tr("Toys");
+    QObject::tr("Education");
+    QObject::tr("Pets");
+    QObject::tr("Nutrition");
+    QObject::tr("Accessories");
+    QObject::tr("Medicine");
+    QObject::tr("Veterinary");
+    QObject::tr("Leisure");
+    QObject::tr("Restaurants and cafes");
+    QObject::tr("Entertainment");
+    QObject::tr("Theater");
+    QObject::tr("Cultural events");
+    QObject::tr("Sport events");
+    QObject::tr("Music and video");
+    QObject::tr("Games");
+    QObject::tr("Board games");
+    QObject::tr("Computer games");
+    QObject::tr("Income from investments");
+    QObject::tr("Capital gains");
+    QObject::tr("Dividends");
+    QObject::tr("Interest");
+    QObject::tr("Other incomes");
+    QObject::tr("Lottery");
+    QObject::tr("Child benefits");
+    QObject::tr("Unemployment compensation");
+    QObject::tr("Miscellaneous");
+    QObject::tr("Salary");
+    QObject::tr("Bonuses");
+    QObject::tr("Overtime");
+    QObject::tr("Healthcare");
+    QObject::tr("Hospital");
+    QObject::tr("Stomatology");
+    QObject::tr("Eye care");
+    QObject::tr("Medicine");
+    QObject::tr("Gym");
+    QObject::tr("Sporting goods");
+    QObject::tr("Cosmetics");
+    QObject::tr("Personal hygiene");
+    QObject::tr("Furniture");
+    QObject::tr("Non-grocery goods");
+    QObject::tr("Stationery");
+    QObject::tr("Smoking");
+    QObject::tr("Education");
+    QObject::tr("Books");
+    QObject::tr("Courses");
+    QObject::tr("Selling of own things");
+    QObject::tr("Public transport");
+    QObject::tr("Bus");
+    QObject::tr("Metro (Underground/Subway)");
+    QObject::tr("Train");
+    QObject::tr("Taxi");
+    QObject::tr("Closing");
+    QObject::tr("Outerwear");
+    QObject::tr("Underwear");
+    QObject::tr("Shoes");
+    QObject::tr("Borrowed money");
+    QObject::tr("Pension");
+    QObject::tr("Gifts");
+    QObject::tr("Food");
+    QObject::tr("Vegetables");
+    QObject::tr("Fruits");
+    QObject::tr("Mushrooms");
+    QObject::tr("Meat");
+    QObject::tr("Fish");
+    QObject::tr("Beverages");
+    QObject::tr("Alcohol");
+    QObject::tr("Snacks");
+    QObject::tr("Bakery products");
+    QObject::tr("Cheese");
+    QObject::tr("Sauce");
+    QObject::tr("Condiment");
+    QObject::tr("Traveling");
+    QObject::tr("Lodging");
+    QObject::tr("Travel");
+    QObject::tr("Flight");
+    QObject::tr("Expenses for work");
+    QObject::tr("Stipend");
+    QObject::tr("Insurance");
+    QObject::tr("Health");
+    QObject::tr("Life");
+    QObject::tr("Auto");
+    QObject::tr("Property");
+    QObject::tr("Bills");
+    QObject::tr("House rental");
+    QObject::tr("Utilities");
+    QObject::tr("Water");
+    QObject::tr("Sewage");
+    QObject::tr("Gas");
+    QObject::tr("Electricity");
+    QObject::tr("Garbage and recycling");
+    QObject::tr("Cell phone");
+    QObject::tr("Telephone");
+    QObject::tr("Internet");
+    QObject::tr("Newspapers and magazines");
+    QObject::tr("Electronics");
+
+#endif // QT_DEBUG
+}
