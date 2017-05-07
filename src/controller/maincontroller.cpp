@@ -52,6 +52,13 @@ MainController::MainController( QApplication& app )
 
     this->mainWindow->show();
 
+//    this->recalculateAccountBalance(QDateTime(), 1);
+//    this->recalculateAccountBalance(QDateTime(), 2);
+//    this->recalculateAccountBalance(QDateTime(), 3);
+//    this->recalculateAccountBalance(QDateTime(), 4);
+//    this->recalculateAccountBalance(QDateTime(), 5);
+//    this->recalculateAccountBalance(QDateTime(), 6);
+
     AppLogger->funcDone( "MainController::MainController" );
 }
 
@@ -567,20 +574,20 @@ void MainController::showAccountsStatus()
     QSqlQueryModel* accountsStatusModel = new QSqlQueryModel( this->mainWindow );
 
     accountsStatusModel->setQuery(
-        "SELECT \
-            a.name AS \"Account name\", \
-            CASE WHEN t.balance_after <> 0 THEN \
-                printf('%.2f', t.balance_after / 100.0) \
-            ELSE \
-                printf('%.2f', a.initial_balance) / 100.0 \
-            END AS \"Current balance\", \
-            a.currency AS \"Currency\" \
-        FROM \
-            accounts a \
-        LEFT JOIN (SELECT * FROM transactions ORDER BY date ASC) t \
-            ON t.source_account_id = a.id OR t.destination_account_id = a.id \
-        GROUP BY a.id \
-        ORDER BY a.id ASC",
+        "SELECT "
+            "a.name AS 'Account name', "
+            "CASE WHEN t.balance_after <> 0 THEN "
+                "printf('%.2f', t.balance_after / 100.0) "
+            "ELSE "
+                "printf('%.2f', a.initial_balance) / 100.0 "
+            "END AS 'Current balance', "
+            "a.currency AS 'Currency' "
+        "FROM "
+            "accounts a "
+        "LEFT JOIN (SELECT * FROM transactions ORDER BY date ASC) t "
+            "ON t.source_account_id = a.id OR t.destination_account_id = a.id "
+        "GROUP BY a.id "
+        "ORDER BY a.id ASC",
         DatabaseManager::getInstance()->getDatabase()
     );
 
@@ -591,22 +598,22 @@ void MainController::showAccountsStatus()
 void MainController::showTotalBalance()
 {
     QSqlQuery query(
-        "SELECT \
-            printf('%.2f', SUM(current_balance / 100.0)) AS \"Total balance\" \
-        FROM \
-            (SELECT \
-                CASE WHEN t.balance_after <> 0 THEN \
-                    t.balance_after \
-                ELSE \
-                    a.initial_balance \
-                END AS \"current_balance\" \
-            FROM \
-                accounts a \
-            LEFT JOIN (SELECT * FROM transactions ORDER BY date ASC) t \
-                ON t.source_account_id = a.id OR t.destination_account_id = a.id \
-            GROUP BY a.id \
-            ORDER BY a.id ASC \
-        )",
+        "SELECT "
+            "printf('%.2f', SUM(current_balance / 100.0)) AS 'Total balance' "
+        "FROM ("
+            "SELECT "
+                "CASE WHEN t.balance_after <> 0 THEN "
+                    "t.balance_after "
+                "ELSE "
+                    "a.initial_balance "
+                "END AS 'current_balance' "
+            "FROM "
+                "accounts a "
+            "LEFT JOIN (SELECT * FROM transactions ORDER BY date ASC) t "
+                "ON t.source_account_id = a.id OR t.destination_account_id = a.id "
+            "ROUP BY a.id "
+            "ORDER BY a.id ASC"
+        ")",
         DatabaseManager::getInstance()->getDatabase()
     );
 
@@ -621,26 +628,31 @@ void MainController::showLastTransactions()
     QSqlQueryModel* lastTransactionsModel = new QSqlQueryModel( this->mainWindow );
 
     lastTransactionsModel->setQuery(
-        "SELECT \
-            printf('%.2f', t.amount / 100.0) || ' UAH' AS \"Amount\", \
-            strftime('%d.%m.%Y %H:%M', t.date) AS \"Date\", \
-            a.name AS \"Source account\", \
-            CASE WHEN COUNT(ti.id) > 0 THEN \
-                GROUP_CONCAT(ti.name, ', ') \
-            ELSE \
-                t.notes \
-            END AS \"Description\" \
-        FROM \
-            transactions t \
-        LEFT JOIN \
-            transaction_items ti ON t.id = ti.transaction_id, \
-            accounts a ON a.id = t.source_account_id \
-        WHERE \
-            (SELECT COUNT(id) FROM transactions WHERE date = t.date) <> 3 \
-        GROUP BY \
-            t.id \
-        ORDER BY \
-            t.date DESC",
+        "SELECT "
+            "printf('%.2f', t.amount / 100.0) || ' UAH' AS 'Amount', "
+            "strftime('%d.%m.%Y %H:%M', t.date) AS 'Date', "
+            "c.name AS 'Category',"
+            "a.name AS 'Source account', "
+            "CASE "
+                "WHEN COUNT(ti.id) > 0 AND t.notes != '' THEN "
+                    "t.notes || ': ' || GROUP_CONCAT(ti.name, ', ') "
+                "WHEN COUNT(ti.id) > 0 THEN "
+                    "GROUP_CONCAT(ti.name, ', ') "
+                "ELSE "
+                    "t.notes "
+            "END 'Description' "
+        "FROM "
+            "transactions t "
+        "LEFT JOIN "
+            "transaction_items ti ON t.id = ti.transaction_id, "
+            "accounts a ON a.id = t.source_account_id, "
+            "categories c ON c.id = t.category_id "
+        "WHERE "
+            "(SELECT COUNT(id) FROM transactions WHERE date = t.date) <> 3 "
+        "GROUP BY "
+            "t.id "
+        "ORDER BY "
+            "t.date DESC",
         DatabaseManager::getInstance()->getDatabase()
     );
 

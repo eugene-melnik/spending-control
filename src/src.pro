@@ -16,7 +16,7 @@ CONFIG += console
 QT = core gui widgets sql
 CONFIG += qt warn_on thread
 
-QMAKE_CXXFLAGS += -std=c++11
+QMAKE_CXXFLAGS += -std=c++11 -fPIC
 QMAKE_CXXFLAGS_RELEASE -= -O2
 QMAKE_CXXFLAGS_RELEASE += -Ofast
 
@@ -117,6 +117,11 @@ CONFIG(debug, debug|release) {
     RCC_DIR = ./tmp/release/rcc
     UI_DIR = ./tmp/release/ui
 }
+
+#contains(DEFINES, Qt5_POSITION_INDEPENDENT_CODE) {
+#    message("Qt5_POSITION_INDEPENDENT_CODE enabled")
+#    QMAKE_CXXFLAGS += -fPIC
+#}
 
 DESTDIR = ./
 

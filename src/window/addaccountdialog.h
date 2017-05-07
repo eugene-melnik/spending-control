@@ -31,7 +31,7 @@ class AddAccountDialog : public EditAccountDialog
     Q_OBJECT
 
     public:
-        AddAccountDialog( QWidget* parent = nullptr );
+        explicit AddAccountDialog( QWidget* parent = nullptr );
 
     protected:
         void showEvent( QShowEvent* event );

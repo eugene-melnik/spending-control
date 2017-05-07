@@ -72,9 +72,9 @@ bool AccountsModel::addRecord( const UniMap& fieldsData )
     DatabaseQuery query( this->database );
 
     query.prepare(
-        "INSERT INTO accounts \
-            (name, description, type, currency, initial_balance, minimal_balance, created_at) \
-        VALUES (?, ?, ?, ?, ?, ?, ?);"
+        "INSERT INTO accounts "
+            "(name, description, type, currency, initial_balance, minimal_balance, created_at) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?)"
     );
 
     query.bindValue( 0, fieldsData.value( "name" ) );
@@ -106,9 +106,9 @@ bool AccountsModel::updateRecord( const UniMap& fieldsData )
     DatabaseQuery query( this->database );
 
     query.prepare(
-        "UPDATE accounts \
-            SET name = ?, description = ?, type = ?, currency = ?, initial_balance = ?, minimal_balance = ? \
-        WHERE id = ?;"
+        "UPDATE accounts "
+            "SET name = ?, description = ?, type = ?, currency = ?, initial_balance = ?, minimal_balance = ? "
+        "WHERE id = ?"
     );
 
     query.bindValue( 0, fieldsData.value( "name" ) );
@@ -160,7 +160,7 @@ bool AccountsModel::deleteOrCloseAccount( int accountId )
     DatabaseQuery query( this->database );
 
     query.prepare(
-        "SELECT COUNT(*) FROM transactions WHERE source_account_id = ? OR destination_account_id = ?;"
+        "SELECT COUNT(*) FROM transactions WHERE source_account_id = ? OR destination_account_id = ?"
     );
 
     query.bindValue( 0, accountId );
@@ -203,7 +203,7 @@ bool AccountsModel::closeAccount( int accountId )
 int AccountsModel::rowCount( const QModelIndex& ) const
 {
     QSqlQuery query = this->database.exec(
-        "SELECT COUNT(*) AS accounts_count FROM accounts WHERE closed_at IS NULL;"
+        "SELECT COUNT(*) AS accounts_count FROM accounts WHERE closed_at IS NULL"
     );
 
     if( query.first() )
@@ -265,8 +265,8 @@ QVariantList AccountsModel::getRecord( int row ) const
         QSqlQuery query( this->database );
 
         query.prepare(
-            "SELECT id, name, description, type, currency, initial_balance, minimal_balance \
-            FROM accounts WHERE closed_at IS NULL ORDER BY name ASC LIMIT 1 OFFSET ?;"
+            "SELECT id, name, description, type, currency, initial_balance, minimal_balance "
+            "FROM accounts WHERE closed_at IS NULL ORDER BY name ASC LIMIT 1 OFFSET ?"
         );
 
         query.bindValue( 0, row );
@@ -336,8 +336,8 @@ UniMap AccountsModel::getById( int id, QSqlDatabase database )
     QSqlQuery query( database );
 
     query.prepare(
-        "SELECT id, name, description, type, currency, initial_balance, minimal_balance, closed_at \
-        FROM accounts WHERE id = ?;"
+        "SELECT id, name, description, type, currency, initial_balance, minimal_balance, closed_at "
+        "FROM accounts WHERE id = ?"
     );
 
     query.bindValue( 0, id );

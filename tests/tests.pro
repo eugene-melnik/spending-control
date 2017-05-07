@@ -14,7 +14,7 @@ CONFIG += qt warn_on thread console testcase
 
 LIBS += -lstdc++ -lpthread
 
-QMAKE_CXXFLAGS += -std=c++11
+QMAKE_CXXFLAGS += -std=c++11 -fPIC
 
 
 INCLUDEPATH += $$PWD/../src/
