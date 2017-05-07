@@ -23,6 +23,7 @@
 
 #include "model/accountsmodel.h"
 #include "model/categoriesmodel.h"
+#include "model/categoriesmodelproxy.h"
 #include "model/transactionsmodel.h"
 #include "model/transactionitemsmodel.h"
 #include "window/accountslistdialog.h"

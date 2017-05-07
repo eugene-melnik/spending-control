@@ -29,7 +29,7 @@
 class AddTransactionDialog : public EditTransactionDialog
 {
     public:
-        AddTransactionDialog( QWidget* parent = nullptr );
+        explicit AddTransactionDialog( QWidget* parent = nullptr );
 
     protected:
         void showEvent( QShowEvent* event );

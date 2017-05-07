@@ -2,15 +2,12 @@
 <ui version="4.0">
  <class>EditTransactionDialog</class>
  <widget class="QDialog" name="EditTransactionDialog">
-  <property name="windowModality">
-   <enum>Qt::WindowModal</enum>
-  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>500</width>
-    <height>370</height>
+    <width>550</width>
+    <height>400</height>
    </rect>
   </property>
   <property name="windowTitle">

@@ -38,6 +38,8 @@ HEADERS += \
     delegate/doublespinboxdelegate.h \
     model/accountsmodel.h \
     model/categoriesmodel.h \
+    model/categoriesmodelproxy.h \
+    model/categorytreeitem.h \
     model/transactionsmodel.h \
     model/transactionitemsmodel.h \
     tool/commandlineparser.h \

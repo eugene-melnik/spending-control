@@ -40,5 +40,5 @@ void AddTransactionDialog::showEvent( QShowEvent* event )
     this->bTypeOutgoing->setChecked( true );
     this->swContent->setCurrentIndex( TransactionsModel::Outgoing );
 
-    event->accept();
+    EditTransactionDialog::showEvent( event );
 }

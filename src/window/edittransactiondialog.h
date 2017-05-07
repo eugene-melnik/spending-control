@@ -38,7 +38,8 @@ class EditTransactionDialog : public QDialog, protected Ui::EditTransactionDialo
         ~EditTransactionDialog();
 
         void setAccountsList( const UniMap& accounts );
-        void setCategoriesList( const UniMap& categories );
+        void setIncomeCategoriesModel( QAbstractItemModel* model );
+        void setOutcomeCategoriesModel( QAbstractItemModel* model );
 
         void setValues( const UniMap& fieldsData );
 

@@ -91,7 +91,18 @@ void MainController::showAddTransaction()
     }
 
     this->addTransactionDialog->setAccountsList( this->getAccountsModel()->getList() );
-    this->addTransactionDialog->setCategoriesList( this->getCategoriesModel()->getList() );
+
+    CategoriesModelProxy* incomeCategoriesModel = new CategoriesModelProxy();
+    incomeCategoriesModel->setSourceModel( this->getCategoriesModel() );
+    incomeCategoriesModel->addFilter( CategoryTreeItem::Column::Type, CategoryTreeItem::Type::Income );
+    incomeCategoriesModel->addFilter( CategoryTreeItem::Column::Type, CategoryTreeItem::Type::All );
+    this->addTransactionDialog->setIncomeCategoriesModel( incomeCategoriesModel );
+
+    CategoriesModelProxy* outcomeCategoriesModel = new CategoriesModelProxy();
+    outcomeCategoriesModel->setSourceModel( this->getCategoriesModel() );
+    outcomeCategoriesModel->addFilter( CategoryTreeItem::Column::Type, CategoryTreeItem::Type::Outcome );
+    outcomeCategoriesModel->addFilter( CategoryTreeItem::Column::Type, CategoryTreeItem::Type::All );
+    this->addTransactionDialog->setOutcomeCategoriesModel( outcomeCategoriesModel );
 
     this->addTransactionDialog->show();
 

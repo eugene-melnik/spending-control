@@ -61,19 +61,36 @@ void EditTransactionDialog::setAccountsList( const UniMap& accounts )
     }
 }
 
-void EditTransactionDialog::setCategoriesList( const UniMap& categories )
+
+void EditTransactionDialog::setIncomeCategoriesModel( QAbstractItemModel* model )
 {
-    this->cbCategoryOutgoing->clear();
-    this->cbCategoryIncoming->clear();
+    delete this->cbCategoryIncoming->model();
 
-    for( const QString& id : categories.keys() )
-    {
-        QString title = categories.value( id ).toString();
-        this->cbCategoryOutgoing->addItem( title, id );
-        this->cbCategoryIncoming->addItem( title, id );
-    }
+    this->cbCategoryIncoming->setModel( model );
+    this->cbCategoryIncoming->hideColumn( CategoryTreeItem::Column::Description );
+    this->cbCategoryIncoming->hideColumn( CategoryTreeItem::Column::Id );
+    this->cbCategoryIncoming->hideColumn( CategoryTreeItem::Column::ParentCategoryId );
+    this->cbCategoryIncoming->hideColumn( CategoryTreeItem::Column::Type );
+}
 
-    this->subitemCategoryDelegare->setValuesList( categories );
+
+void EditTransactionDialog::setOutcomeCategoriesModel( QAbstractItemModel* model )
+{
+    delete this->cbCategoryOutgoing->model();
+
+    this->cbCategoryOutgoing->setModel( model );
+    this->cbCategoryOutgoing->hideColumn( CategoryTreeItem::Column::Description );
+    this->cbCategoryOutgoing->hideColumn( CategoryTreeItem::Column::Id );
+    this->cbCategoryOutgoing->hideColumn( CategoryTreeItem::Column::ParentCategoryId );
+    this->cbCategoryOutgoing->hideColumn( CategoryTreeItem::Column::Type );
+
+    this->subitemCategoryDelegare->setModel( model );
+    this->subitemCategoryDelegare->hideColumns({
+        CategoryTreeItem::Column::Description,
+        CategoryTreeItem::Column::Id,
+        CategoryTreeItem::Column::ParentCategoryId,
+        CategoryTreeItem::Column::Type
+    });
 }
 
 
@@ -207,8 +224,10 @@ void EditTransactionDialog::deleteSubitem()
 }
 
 
-void EditTransactionDialog::recalculateSubitemsAmount( int /* changedRow */, int changedColumn )
+void EditTransactionDialog::recalculateSubitemsAmount( int changedRow, int changedColumn )
 {
+    Q_UNUSED(changedRow)
+
     if( changedColumn == SubitemColumn::Amount )
     {
         double newTotalAmount = 0.0;
@@ -269,10 +288,18 @@ UniMap EditTransactionDialog::getCurrentPageValues() const
     {
         case TransactionsModel::Outgoing :
         {
-            values.insert( "source_account_id", this->cbAccountOutgoing->currentData().toInt() );
+            values.insert( "source_account_id", this->cbAccountOutgoing->currentData() );
             values.insert( "amount", this->sbAmountOutgoing->value() );
-            values.insert( "category_id", this->cbCategoryOutgoing->currentData() );
             values.insert( "notes", this->eNotesOutgoing->toPlainText() );
+
+            int selectedRow = this->cbCategoryOutgoing->currentIndex().row();
+            QModelIndex parentIndex = this->cbCategoryOutgoing->currentIndex().parent();
+
+            QModelIndex dataIndex = this->cbCategoryOutgoing->model()->index(
+                selectedRow, CategoryTreeItem::Column::Id, parentIndex
+            );
+
+            values.insert( "category_id", this->cbCategoryOutgoing->model()->data( dataIndex ) );
 
             QList<QVariantList> subitems;
 
@@ -297,9 +324,9 @@ UniMap EditTransactionDialog::getCurrentPageValues() const
 
         case TransactionsModel::Incoming :
         {
-            values.insert( "destination_account_id", this->cbDestinationAccountIncoming->currentData().toInt() );
+            values.insert( "destination_account_id", this->cbDestinationAccountIncoming->currentData() );
             values.insert( "amount", this->sbAmountIncoming->value() );
-            values.insert( "category_id", this->cbCategoryIncoming->currentData().toInt() );
+            values.insert( "category_id", this->cbCategoryIncoming->currentData() );
             values.insert( "notes", this->eNotesIncoming->toPlainText() );
 
             break;
@@ -307,10 +334,10 @@ UniMap EditTransactionDialog::getCurrentPageValues() const
 
         case TransactionsModel::Internal :
         {
-            values.insert( "source_account_id", this->cbSourceAccountInternal->currentData().toInt() );
-            values.insert( "destination_account_id", this->cbDestinationAccountInternal->currentData().toInt() );
+            values.insert( "source_account_id", this->cbSourceAccountInternal->currentData() );
+            values.insert( "destination_account_id", this->cbDestinationAccountInternal->currentData() );
             values.insert( "amount", this->sbAmountInternal->value() );
-            values.insert( "category_id", 1 );
+            values.insert( "category_id", 1 ); // have no category
             values.insert( "notes", this->eNotesInternal->toPlainText() );
 
             break;
