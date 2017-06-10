@@ -77,11 +77,15 @@ class TreeComboBoxDelegate : public QStyledItemDelegate
         void setModelData( QWidget* editor, QAbstractItemModel* model, const QModelIndex& index ) const override
         {
             TreeComboBox* comboBox = static_cast<TreeComboBox*>( editor );
-            model->setData( index, comboBox->currentText(), Qt::EditRole );
+            QModelIndex currentIndex = comboBox->currentIndex();
 
-            int selectedRow = comboBox->currentIndex().row();
-            QModelIndex dataIndex = comboBox->model()->index( selectedRow, this->dataColumn );
-            model->setData( index, comboBox->model()->data( dataIndex ), Qt::UserRole );
+            QModelIndex dataIndex = comboBox->model()->index(
+                currentIndex.row(), this->dataColumn, currentIndex.parent()
+            );
+
+            model->setData( index, comboBox->currentText(), Qt::DisplayRole );
+            model->setData( index, comboBox->currentText(), Qt::EditRole );
+            model->setData( index, dataIndex.data(), Qt::UserRole );
         }
 
         void updateEditorGeometry( QWidget* editor, const QStyleOptionViewItem& option, const QModelIndex& /*index*/ ) const override

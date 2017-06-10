@@ -203,7 +203,7 @@ void EditTransactionDialog::createSubitem()
         this->twSubitems->setItem( newRowId, SubitemColumn::Name, name );
 
         QTableWidgetItem* category = new QTableWidgetItem( this->cbCategoryOutgoing->currentText() );
-        category->setData( Qt::UserRole, this->cbCategoryOutgoing->currentData() );
+        category->setData( Qt::UserRole, this->getCategoryId( this->cbCategoryOutgoing ) );
         this->twSubitems->setItem( newRowId, SubitemColumn::CategoryId, category );
 
         QTableWidgetItem* amount = new QTableWidgetItem( "0" );
@@ -262,6 +262,18 @@ void EditTransactionDialog::setupSubitemsWidget()
 }
 
 
+int EditTransactionDialog::getCategoryId( TreeComboBox* comboBox ) const
+{
+    QModelIndex currentIndex = comboBox->currentIndex();
+
+    QModelIndex idIndex = comboBox->model()->index(
+        currentIndex.row(), CategoryTreeItem::Column::Id, currentIndex.parent()
+    );
+
+    return( idIndex.data().toInt() );
+}
+
+
 int EditTransactionDialog::getCurrentType() const
 {
     QAbstractButton* button = this->typesButtonGroup->checkedButton();
@@ -292,15 +304,7 @@ UniMap EditTransactionDialog::getCurrentPageValues() const
             values.insert( "source_account_id", this->cbAccountOutgoing->currentData() );
             values.insert( "amount", this->sbAmountOutgoing->value() );
             values.insert( "notes", this->eNotesOutgoing->toPlainText() );
-
-            int selectedRow = this->cbCategoryOutgoing->currentIndex().row();
-            QModelIndex parentIndex = this->cbCategoryOutgoing->currentIndex().parent();
-
-            QModelIndex dataIndex = this->cbCategoryOutgoing->model()->index(
-                selectedRow, CategoryTreeItem::Column::Id, parentIndex
-            );
-
-            values.insert( "category_id", this->cbCategoryOutgoing->model()->data( dataIndex ) );
+            values.insert( "category_id", this->getCategoryId( this->cbCategoryOutgoing ) );
 
             QList<QVariantList> subitems;
 
@@ -308,11 +312,11 @@ UniMap EditTransactionDialog::getCurrentPageValues() const
             {
                 QVariantList rowData;
 
-                // 0
+                // rowData[0]
                 rowData.append( this->twSubitems->item( row, SubitemColumn::Name )->text() );
-                // 1
+                // rowData[1]
                 rowData.append( this->twSubitems->item( row, SubitemColumn::CategoryId )->data( Qt::UserRole ) );
-                // 2
+                // rowData[2]
                 rowData.append( (int) (this->twSubitems->item( row, SubitemColumn::Amount )->text().toDouble() * 100) );
 
                 subitems.append( rowData );

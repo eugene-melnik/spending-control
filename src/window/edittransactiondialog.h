@@ -59,6 +59,8 @@ class EditTransactionDialog : public QDialog, protected Ui::EditTransactionDialo
     protected:
         void setupSubitemsWidget();
 
+        int getCategoryId( TreeComboBox* comboBox ) const;
+
         int getCurrentType() const;
         UniMap getCurrentPageValues() const;
 
