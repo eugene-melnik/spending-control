@@ -63,6 +63,7 @@ class EditTransactionDialog : public QDialog, protected Ui::EditTransactionDialo
         UniMap getCurrentPageValues() const;
 
         void okClicked();
+        bool isRequiredFieldsFilled();
 
         enum SubitemColumn
         {

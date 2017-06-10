@@ -38,11 +38,6 @@ class TreeComboBoxDelegate : public QStyledItemDelegate
 
         void setModel( QAbstractItemModel* model )
         {
-            if( this->model != nullptr )
-            {
-                delete this->model;
-            }
-
             this->model = model;
         }
 

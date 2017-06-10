@@ -23,6 +23,7 @@
 #include "edittransactiondialog.h"
 
 #include <QDateTime>
+#include <QMessageBox>
 
 
 EditTransactionDialog::EditTransactionDialog( QWidget* parent )
@@ -350,6 +351,11 @@ UniMap EditTransactionDialog::getCurrentPageValues() const
 
 void EditTransactionDialog::okClicked()
 {
+    if( !this->isRequiredFieldsFilled() )
+    {
+        return;
+    }
+
     UniMap currentPageValues = this->getCurrentPageValues();
 
     UniMap fieldsData = {
@@ -371,4 +377,131 @@ void EditTransactionDialog::okClicked()
     emit this->saveData( fieldsData );
 
     this->accept();
+}
+
+
+bool EditTransactionDialog::isRequiredFieldsFilled()
+{
+    QString messageboxTitle = tr( "Save transaction data" );
+    QString messageAmountTooLow = tr( "It seems like the total amount of the transaction is too low. Are you sure you want to save it?" );
+
+    switch( this-> getCurrentType() )
+    {
+        case TransactionsModel::Outgoing :
+        {
+            // Transaction marked as 'has subitems'
+            // but have not actually subitems
+            if( this->cSubitems->isChecked() && this->twSubitems->rowCount() == 0 )
+            {
+                QMessageBox::information(
+                    this, messageboxTitle,
+                    tr( "Should contain at least one subitem!" )
+                );
+
+                return( false );
+            }
+
+            // Transaction without subitems
+            // should have description (notes)
+            if( this->eNotesOutgoing->toPlainText().isEmpty() && !this->cSubitems->isChecked() )
+            {
+                QMessageBox::information(
+                    this, messageboxTitle,
+                    tr( "Field \"Notes\" is required!" )
+                );
+
+                return( false );
+            }
+
+            // Ask if total amount is about zero
+            // may be some mistake
+            if( this->sbAmountOutgoing->value() < 0.01 )
+            {
+                int response = QMessageBox::question(
+                    this, messageboxTitle,
+                    messageAmountTooLow
+                );
+
+                if( response == QMessageBox::StandardButton::No
+                    || response == QMessageBox::StandardButton::Cancel )
+                {
+                    return( false );
+                }
+            }
+
+            break;
+        }
+
+        case TransactionsModel::Incoming :
+        {
+            // Ask if total amount is about zero
+            // may be some mistake
+            if( this->sbAmountIncoming->value() < 0.01 )
+            {
+                int response = QMessageBox::question(
+                    this, messageboxTitle,
+                    messageAmountTooLow
+                );
+
+                if( response == QMessageBox::StandardButton::No
+                    || response == QMessageBox::StandardButton::Cancel )
+                {
+                    return( false );
+                }
+            }
+
+            // Notes for the incoming transaction are not mandatory
+            // but need to ask user if he left it empty
+            if( this->eNotesIncoming->toPlainText().isEmpty() )
+            {
+                int response = QMessageBox::question(
+                    this, messageboxTitle,
+                    tr( "Are you sure you want to save transaction notes empty?" )
+                );
+
+                if( response == QMessageBox::StandardButton::No
+                    || response == QMessageBox::StandardButton::Cancel )
+                {
+                    return( false );
+                }
+            }
+
+            // TODO: add category != root checking (?)
+
+            break;
+        }
+
+        case TransactionsModel::Internal :
+        {
+            // Ask if total amount is about zero
+            // may be some mistake
+            if( this->sbAmountInternal->value() < 0.01 )
+            {
+                int response = QMessageBox::question(
+                    this, messageboxTitle,
+                    messageAmountTooLow
+                );
+
+                if( response == QMessageBox::StandardButton::No
+                    || response == QMessageBox::StandardButton::Cancel )
+                {
+                    return( false );
+                }
+            }
+
+            if( this->cbSourceAccountInternal->currentData() == this->cbDestinationAccountInternal->currentData())
+            {
+                QMessageBox::information(
+                    this, messageboxTitle,
+                    tr( "\"Source\" and \"Destination\" accounts should not be the same!" )
+                );
+
+                return( false );
+            }
+
+            break;
+        }
+    }
+
+    return( true );
 }

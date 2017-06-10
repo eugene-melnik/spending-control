@@ -611,7 +611,7 @@ void MainController::showTotalBalance()
                 "accounts a "
             "LEFT JOIN (SELECT * FROM transactions ORDER BY date ASC) t "
                 "ON t.source_account_id = a.id OR t.destination_account_id = a.id "
-            "ROUP BY a.id "
+            "GROUP BY a.id "
             "ORDER BY a.id ASC"
         ")",
         DatabaseManager::getInstance()->getDatabase()
