@@ -63,7 +63,7 @@ void Logger::log( const QString& message, const UniMap& values, Logger::Level le
 {
     if( level >= Logger::minLevel )
     {
-        if( message.isEmpty() )
+        if( message.isEmpty() && values.isEmpty() )
         {
             this->write( "\n" );
         }
@@ -72,7 +72,27 @@ void Logger::log( const QString& message, const UniMap& values, Logger::Level le
             this->write( QString( "[%1] -- %2 -- %3\n" ).arg(
                 this->getTimestamp(),
                 this->getLevelString( level ),
-                message + ( values.isEmpty() ? "" : " -- " + this->formatValues( values ) )
+                message + ( values.isEmpty() ? "" : " -- " + this->formatUnimapValues( values ) )
+            ) );
+        }
+    }
+}
+
+
+void Logger::log( const QString& message, const QVariantList& list, Logger::Level level )
+{
+    if( level >= Logger::minLevel )
+    {
+        if( message.isEmpty() && list.isEmpty() )
+        {
+            this->write( "\n" );
+        }
+        else
+        {
+            this->write( QString( "[%1] -- %2 -- %3\n" ).arg(
+                this->getTimestamp(),
+                this->getLevelString( level ),
+                message + ( list.isEmpty() ? "" : " -- " + this->formatListValues( list ) )
             ) );
         }
     }
@@ -81,7 +101,7 @@ void Logger::log( const QString& message, const UniMap& values, Logger::Level le
 
 void Logger::funcStart( const QString& funcName, UniMap arguments )
 {
-    QString message = QString( "%1(%2)" ).arg( funcName, this->formatValues( arguments ) );
+    QString message = QString( "%1(%2)" ).arg( funcName, this->formatUnimapValues( arguments ) );
 
     QTime startTime;
     startTime.start();
@@ -104,7 +124,7 @@ void Logger::funcDone( const QString& funcName, UniMap arguments )
     }
 
     this->log( QString( "Done: %1 in %2 %3" ).arg(
-        funcName + ( arguments.isEmpty() ? "" : "(" + this->formatValues( arguments ) + ")"),
+        funcName + ( arguments.isEmpty() ? "" : "(" + this->formatUnimapValues( arguments ) + ")"),
         QString::number( timeElapsed ),
         timeUnit
     ), UniMap(), Level::DEBUG );
@@ -190,7 +210,7 @@ QString Logger::getTimestamp() const
 }
 
 
-QString Logger::formatValues( const UniMap& values, bool withNewLines )
+QString Logger::formatUnimapValues( const UniMap& values, bool withNewLines )
 {
     // TODO: add support of subarrays etc.
 
@@ -201,6 +221,22 @@ QString Logger::formatValues( const UniMap& values, bool withNewLines )
         result += QString( "%1='%2'%3" ).arg(
             key,
             values.value( key ).toString(),
+            withNewLines ? "\n" : " "
+        );
+    }
+
+    return( result );
+}
+
+
+QString Logger::formatListValues( const QVariantList& list, bool withNewLines )
+{
+    QString result;
+
+    for( const QVariant& value : list )
+    {
+        result += QString( "'%1'%2" ).arg(
+            value.toString(),
             withNewLines ? "\n" : " "
         );
     }

@@ -170,6 +170,8 @@ void MainController::addTransaction( const UniMap& fieldsData )
 
         for( const QVariantList& rowData : subitems )
         {
+            AppLogger->log( "Add subitem", rowData, Logger::Level::DEBUG );
+
             QString name = rowData.at( 0 ).toString();
 
             bool added = transactionItemsModel->addRecord({

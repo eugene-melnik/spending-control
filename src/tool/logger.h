@@ -44,6 +44,7 @@ class Logger
          *
          */
         void log( const QString& message, const UniMap& values, Level level);
+        void log( const QString& message, const QVariantList& list, Level level);
 
         void debug( const QString& message, const UniMap& values = UniMap() )
         {
@@ -93,7 +94,8 @@ class Logger
         ~Logger() = delete;
 
         QString getTimestamp() const;
-        QString formatValues( const UniMap& values, bool withNewLines = false );
+        QString formatUnimapValues( const UniMap& values, bool withNewLines = false );
+        QString formatListValues( const QVariantList& list, bool withNewLines = false );
         QString getLevelString( Level level ) const;
 
         void write( const QString& string );
