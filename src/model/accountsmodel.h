@@ -38,10 +38,10 @@ class AccountsModel : public QAbstractTableModel
 
         bool addRecord( const UniMap& fieldsData );
         bool updateRecord( const UniMap& fieldsData );
-        bool deleteRecord( int accountId );
+        bool deleteRecord( unsigned int accountId );
 
-        bool deleteOrCloseAccount( int accountId );
-        bool closeAccount( int accountId );
+        bool deleteOrCloseAccount( unsigned int accountId );
+        bool closeAccount( unsigned int accountId );
 
         int rowCount( const QModelIndex& parent = QModelIndex() ) const override;
         int columnCount( const QModelIndex& parent = QModelIndex() ) const override;

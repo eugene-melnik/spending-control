@@ -47,9 +47,6 @@ class CategoriesModel : public QAbstractItemModel
         int rowCount( const QModelIndex& parent = QModelIndex() ) const override;
         int columnCount( const QModelIndex& parent = QModelIndex() ) const override;
 
-        void addFilter( CategoryTreeItem::Column column, const QVariant& value );
-        void resetFilters();
-
     protected:
         void loadAllData();
         void loadSubscategories( CategoryTreeItem* parentCategory );
@@ -57,8 +54,6 @@ class CategoriesModel : public QAbstractItemModel
         QList<QVariantList> getSubcategories( int parentCategoryId );
 
     private:
-        QMap<CategoryTreeItem::Column,QVariant> filters;
-
         QSqlDatabase database;
         CategoryTreeItem* rootItem = nullptr;
 

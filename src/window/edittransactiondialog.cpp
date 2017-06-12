@@ -97,12 +97,16 @@ void EditTransactionDialog::setOutcomeCategoriesModel( QAbstractItemModel* model
 
 void EditTransactionDialog::setValues( const UniMap& fieldsData )
 {
+    this->clearAllValues();
+
+    this->transactionId = fieldsData.value( "id" ).toUInt();
+
     QString date = fieldsData.value( "date" ).toString();
     this->wCalendar->setSelectedDate( QDate::fromString( date , Qt::ISODate ) );
     this->eDatetime->setDateTime( QDateTime::fromString( date , Qt::ISODate ) );
 
     int type = fieldsData.value( "type" ).toInt();
-    this->clearPageValues( type );
+    this->swContent->setCurrentIndex( type );
 
     switch( type )
     {
@@ -110,7 +114,23 @@ void EditTransactionDialog::setValues( const UniMap& fieldsData )
         {
             this->bTypeOutgoing->setChecked( true );
 
-            //
+            this->sbAmountOutgoing->setValue( fieldsData.value( "amount" ).toInt() / 100.0 );
+            this->eNotesOutgoing->setPlainText( fieldsData.value( "notes" ).toString() );
+
+            if( fieldsData.contains( "transaction_subitems" ) )
+            {
+                QList<QVariantList> subitems = fieldsData.value( "transaction_subitems" ).value<QList<QVariantList>>();
+
+                if( subitems.count() > 0 )
+                {
+                    this->cSubitems->setChecked( true );
+
+                    for( const QVariantList& values : subitems )
+                    {
+                        this->createSubitem( values );
+                    }
+                }
+            }
 
             break;
         }
@@ -119,7 +139,7 @@ void EditTransactionDialog::setValues( const UniMap& fieldsData )
         {
             this->bTypeIncoming->setChecked( true );
 
-            //
+            // TODO
 
             break;
         }
@@ -128,13 +148,11 @@ void EditTransactionDialog::setValues( const UniMap& fieldsData )
         {
             this->bTypeInternal->setChecked( true );
 
-            //
+            // TODO
 
             break;
         }
     }
-
-    this->swContent->setCurrentIndex( type );
 }
 
 
@@ -153,8 +171,6 @@ void EditTransactionDialog::changeType()
 
 void EditTransactionDialog::clearPageValues( int page )
 {
-    this->setCurrentDate();
-
     switch( page )
     {
         case TransactionsModel::Outgoing :
@@ -189,7 +205,17 @@ void EditTransactionDialog::clearPageValues( int page )
 }
 
 
-void EditTransactionDialog::createSubitem()
+void EditTransactionDialog::clearAllValues()
+{
+    this->clearPageValues( TransactionsModel::Outgoing );
+    this->clearPageValues( TransactionsModel::Incoming );
+    this->clearPageValues( TransactionsModel::Internal );
+
+    this->setCurrentDate();
+}
+
+
+void EditTransactionDialog::createSubitem( const QVariantList& values )
 {
     int newRowId = this->twSubitems->rowCount();
 
@@ -199,17 +225,30 @@ void EditTransactionDialog::createSubitem()
     {
         this->twSubitems->insertRow( newRowId );
 
-        QTableWidgetItem* name = new QTableWidgetItem( "" );
+        QTableWidgetItem* name = new QTableWidgetItem();
         this->twSubitems->setItem( newRowId, SubitemColumn::Name, name );
 
-        QTableWidgetItem* category = new QTableWidgetItem( this->cbCategoryOutgoing->currentText() );
-        category->setData( Qt::UserRole, this->getCategoryId( this->cbCategoryOutgoing ) );
+        QTableWidgetItem* category = new QTableWidgetItem();
         this->twSubitems->setItem( newRowId, SubitemColumn::CategoryId, category );
 
-        QTableWidgetItem* amount = new QTableWidgetItem( "0" );
+        QTableWidgetItem* amount = new QTableWidgetItem();
         this->twSubitems->setItem( newRowId, SubitemColumn::Amount, amount );
 
-        this->twSubitems->editItem( this->twSubitems->item( newRowId, SubitemColumn::Name ) );
+        if( values.count() == 3 )
+        {
+            name->setText( values.at( 0 ).toString() );
+            category->setText( values.at( 1 ).toString() ); // FIXME:
+            category->setData( Qt::UserRole, values.at( 1 ).toInt() );
+            amount->setText( QString::number( values.at( 2 ).toInt() / 100.0 ) );
+        }
+        else
+        {
+            category->setText( this->cbCategoryOutgoing->currentText() );
+            category->setData( Qt::UserRole, this->getCategoryId( this->cbCategoryOutgoing ) );
+            amount->setText( "0" );
+
+            this->twSubitems->editItem( this->twSubitems->item( newRowId, SubitemColumn::Name ) );
+        }
     }
     else
     {
@@ -255,9 +294,8 @@ void EditTransactionDialog::setupSubitemsWidget()
     this->subitemAmountDelegate = new DoubleSpinboxDelegate();
     this->twSubitems->setItemDelegateForColumn( SubitemColumn::Amount, this->subitemAmountDelegate );
 
-    this->connect( this->bSubitemAdd, &QPushButton::clicked, this, &EditTransactionDialog::createSubitem );
+    this->connect( this->bSubitemAdd, SIGNAL(clicked()), this, SLOT(createSubitem(QVariantList)) );
     this->connect( this->bSubitemDelete, &QPushButton::clicked, this, &EditTransactionDialog::deleteSubitem );
-
     this->connect( this->twSubitems, &QTableWidget::cellChanged, this, &EditTransactionDialog::recalculateSubitemsAmount );
 }
 

@@ -34,6 +34,11 @@ MainWindow::MainWindow( QWidget* parent ) : QMainWindow( parent )
     #ifdef QT_DEBUG
         this->setWindowTitle( " -= DEVELOPMENT BUILD =- version " + Application::appVersionFull );
     #endif
+
+    this->connect( this->tvTransactions, &QTableView::doubleClicked, this, [this] ( const QModelIndex& index ) {
+        int id = this->tvTransactions->model()->index( index.row(), 0 , index.parent() ).data().toInt();
+        emit this->editTransaction( id );
+    } );
 }
 
 
@@ -60,6 +65,9 @@ void MainWindow::setLastTransactionsModel( QAbstractItemModel* model )
     }
 
     this->tvTransactions->setModel( model );
+
+    this->tvTransactions->horizontalHeader()->setSectionHidden( 0, true ); // id
+    this->tvTransactions->horizontalHeader()->resizeSection( 1, 70 ); // amount
 }
 
 

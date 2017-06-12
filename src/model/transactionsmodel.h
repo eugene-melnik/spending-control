@@ -38,7 +38,9 @@ class TransactionsModel : public QAbstractTableModel
 
         bool addRecord( const UniMap& fieldsData, unsigned int* createdId = nullptr );
         bool updateRecord( const UniMap& fieldsData );
-        bool deleteRecord( int transactionId );
+        bool deleteRecord( unsigned int transactionId );
+
+        UniMap getRecordForEdit( unsigned int transactionId ) const;
 
         int rowCount( const QModelIndex& parent = QModelIndex() ) const override;
         int columnCount( const QModelIndex& parent = QModelIndex() ) const override;

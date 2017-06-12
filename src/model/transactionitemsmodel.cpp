@@ -36,9 +36,9 @@ bool TransactionItemsModel::addRecord( const UniMap& fieldsData, unsigned int* c
     DatabaseQuery query( this->database );
 
     query.prepare(
-        "INSERT INTO transaction_items \
-            (transaction_id, name, category_id, amount) \
-        VALUES (?, ?, ?, ?);"
+        "INSERT INTO transaction_items "
+            "(transaction_id, name, category_id, amount) "
+        "VALUES (?, ?, ?, ?)"
     );
 
     query.bindValue( 0, fieldsData.value( "transaction_id" ) );
@@ -69,4 +69,65 @@ bool TransactionItemsModel::addRecord( const UniMap& fieldsData, unsigned int* c
     //this->records.clear();
 
     return( ok );
+}
+
+
+bool TransactionItemsModel::clearItemsFor( unsigned int transactionId )
+{
+    //this->beginResetModel();
+
+    DatabaseQuery query( this->database );
+
+    query.prepare(
+        "DELETE FROM transaction_items "
+        "WHERE transaction_id = ?"
+    );
+
+    query.bindValue( 0, transactionId );
+
+    bool ok = query.exec();
+
+    if( !ok )
+    {
+        AppLogger->error( "TransactionItemsModel::clearItemsFor - Can't clear subitems: " + query.lastError().text() );
+    }
+
+    //this->endResetModel();
+    //this->records.clear();
+
+    return( ok );
+}
+
+
+QList<QVariantList> TransactionItemsModel::getItemsForEdit( unsigned int transactionId ) const
+{
+    DatabaseQuery query( this->database );
+
+    query.prepare(
+        "SELECT name, category_id, amount "
+        "FROM transaction_items "
+        "WHERE transaction_id = ?"
+    );
+
+    query.bindValue( 0, transactionId );
+
+    bool ok = query.exec();
+    QList<QVariantList> result;
+
+    if( !ok )
+    {
+        AppLogger->error( "TransactionItemsModel::getItemsForEdit - Can't load subitems: " + query.lastError().text() );
+        return( result );
+    }
+
+    while( query.next() )
+    {
+        result.append( QVariantList({
+           { query.value( 0 ) },
+           { query.value( 1 ) },
+           { query.value( 2 ) },
+       }));
+    }
+
+    return( result );
 }

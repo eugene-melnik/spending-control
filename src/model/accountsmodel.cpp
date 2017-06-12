@@ -133,7 +133,7 @@ bool AccountsModel::updateRecord( const UniMap& fieldsData )
 }
 
 
-bool AccountsModel::deleteRecord( int accountId )
+bool AccountsModel::deleteRecord( unsigned int accountId )
 {
     this->beginResetModel();
 
@@ -155,7 +155,7 @@ bool AccountsModel::deleteRecord( int accountId )
 }
 
 
-bool AccountsModel::deleteOrCloseAccount( int accountId )
+bool AccountsModel::deleteOrCloseAccount( unsigned int accountId )
 {
     DatabaseQuery query( this->database );
 
@@ -177,7 +177,7 @@ bool AccountsModel::deleteOrCloseAccount( int accountId )
 }
 
 
-bool AccountsModel::closeAccount( int accountId )
+bool AccountsModel::closeAccount( unsigned int accountId )
 {
     this->beginResetModel();
 

@@ -32,6 +32,10 @@ class TransactionItemsModel
 
         bool addRecord( const UniMap& fieldsData, unsigned int* createdId = nullptr );
 
+        bool clearItemsFor( unsigned int transactionId );
+
+        QList<QVariantList> getItemsForEdit( unsigned int transactionId ) const;
+
     protected:
         QSqlDatabase database;
 };

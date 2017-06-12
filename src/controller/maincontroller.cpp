@@ -52,13 +52,6 @@ MainController::MainController( QApplication& app )
 
     this->mainWindow->show();
 
-//    this->recalculateAccountBalance(QDateTime(), 1);
-//    this->recalculateAccountBalance(QDateTime(), 2);
-//    this->recalculateAccountBalance(QDateTime(), 3);
-//    this->recalculateAccountBalance(QDateTime(), 4);
-//    this->recalculateAccountBalance(QDateTime(), 5);
-//    this->recalculateAccountBalance(QDateTime(), 6);
-
     AppLogger->funcDone( "MainController::MainController" );
 }
 
@@ -93,27 +86,36 @@ void MainController::showAddTransaction()
         AppLogger->debug( "AddTransactionDialog creation..." );
 
         this->addTransactionDialog = new AddTransactionDialog( this->mainWindow );
-
         this->connect( this->addTransactionDialog, &AddTransactionDialog::saveData, this, &MainController::addTransaction );
     }
 
-    this->addTransactionDialog->setAccountsList( this->getAccountsModel()->getList() );
-
-    CategoriesModelProxy* incomeCategoriesModel = new CategoriesModelProxy();
-    incomeCategoriesModel->setSourceModel( this->getCategoriesModel() );
-    incomeCategoriesModel->addFilter( CategoryTreeItem::Column::Type, CategoryTreeItem::Type::Income );
-    incomeCategoriesModel->addFilter( CategoryTreeItem::Column::Type, CategoryTreeItem::Type::All );
-    this->addTransactionDialog->setIncomeCategoriesModel( incomeCategoriesModel );
-
-    CategoriesModelProxy* outcomeCategoriesModel = new CategoriesModelProxy();
-    outcomeCategoriesModel->setSourceModel( this->getCategoriesModel() );
-    outcomeCategoriesModel->addFilter( CategoryTreeItem::Column::Type, CategoryTreeItem::Type::Outcome );
-    outcomeCategoriesModel->addFilter( CategoryTreeItem::Column::Type, CategoryTreeItem::Type::All );
-    this->addTransactionDialog->setOutcomeCategoriesModel( outcomeCategoriesModel );
-
+    this->prepareTransactionsEditor( this->addTransactionDialog );
     this->addTransactionDialog->show();
 
     AppLogger->funcDone( "MainController::showAddTransaction" );
+}
+
+
+void MainController::showEditTransaction( unsigned int id )
+{
+    AppLogger->funcStart( "MainController::showEditTransaction", {{ "id", id }} );
+
+    if( this->editTransactionDialog == nullptr )
+    {
+        AppLogger->debug( "EditTransactionDialog creation..." );
+
+        this->editTransactionDialog = new EditTransactionDialog( this->mainWindow );
+        this->connect( this->editTransactionDialog, &EditTransactionDialog::saveData, this, &MainController::addTransaction );
+    }
+
+    UniMap values = this->getTransactionsModel()->getRecordForEdit( id );
+    values.insert( "transaction_subitems", QVariant::fromValue( this->getTransactionItemsModel()->getItemsForEdit( id ) ) );
+
+    this->prepareTransactionsEditor( this->editTransactionDialog );
+    this->editTransactionDialog->setValues( values );
+    this->editTransactionDialog->show();
+
+    AppLogger->funcDone( "MainController::showEditTransaction" );
 }
 
 
@@ -121,8 +123,22 @@ void MainController::addTransaction( const UniMap& fieldsData )
 {
     AppLogger->funcStart( "MainController::addTransaction", fieldsData );
 
-    unsigned int transactionId = 0;
-    bool ok = this->getTransactionsModel()->addRecord( fieldsData, &transactionId );
+    unsigned int transactionId = fieldsData.value( "id" ).toUInt();
+    bool ok = false;
+
+    if( transactionId == 0 )
+    {
+        ok = this->getTransactionsModel()->addRecord( fieldsData, &transactionId );
+    }
+    else
+    {
+        ok = this->getTransactionsModel()->updateRecord( fieldsData );
+
+        if( ok )
+        {
+            this->getTransactionItemsModel()->clearItemsFor( transactionId );
+        }
+    }
 
     if( !ok )
     {
@@ -171,7 +187,6 @@ void MainController::addTransaction( const UniMap& fieldsData )
         for( const QVariantList& rowData : subitems )
         {
             AppLogger->log( "Add subitem", rowData, Logger::Level::DEBUG );
-
             QString name = rowData.at( 0 ).toString();
 
             bool added = transactionItemsModel->addRecord({
@@ -555,6 +570,7 @@ void MainController::connectSignals()
     AppLogger->debug( "MainController::connectSignals()" );
 
     this->connect( this->mainWindow, &MainWindow::addTransaction, this, &MainController::showAddTransaction );
+    this->connect( this->mainWindow, &MainWindow::editTransaction, this, &MainController::showEditTransaction );
     this->connect( this->mainWindow, &MainWindow::manageAccounts, this, &MainController::showManageAccounts );
     this->connect( this->mainWindow, &MainWindow::manageCategories, this, &MainController::showManageCategories );
 
@@ -631,6 +647,7 @@ void MainController::showLastTransactions()
 
     lastTransactionsModel->setQuery(
         "SELECT "
+            "t.id AS 'ID', "
             "printf('%.2f', t.amount / 100.0) || ' UAH' AS 'Amount', "
             "strftime('%d.%m.%Y %H:%M', t.date) AS 'Date', "
             "c.name AS 'Category',"
@@ -659,6 +676,24 @@ void MainController::showLastTransactions()
     );
 
     this->mainWindow->setLastTransactionsModel( lastTransactionsModel );
+}
+
+
+void MainController::prepareTransactionsEditor( EditTransactionDialog* dialog )
+{
+    dialog->setAccountsList( this->getAccountsModel()->getList() );
+
+    CategoriesModelProxy* incomeCategoriesModel = new CategoriesModelProxy();
+    incomeCategoriesModel->setSourceModel( this->getCategoriesModel() );
+    incomeCategoriesModel->addFilter( CategoryTreeItem::Column::Type, CategoryTreeItem::Type::Income );
+    incomeCategoriesModel->addFilter( CategoryTreeItem::Column::Type, CategoryTreeItem::Type::All );
+    dialog->setIncomeCategoriesModel( incomeCategoriesModel );
+
+    CategoriesModelProxy* outcomeCategoriesModel = new CategoriesModelProxy();
+    outcomeCategoriesModel->setSourceModel( this->getCategoriesModel() );
+    outcomeCategoriesModel->addFilter( CategoryTreeItem::Column::Type, CategoryTreeItem::Type::Outcome );
+    outcomeCategoriesModel->addFilter( CategoryTreeItem::Column::Type, CategoryTreeItem::Type::All );
+    dialog->setOutcomeCategoriesModel( outcomeCategoriesModel );
 }
 
 

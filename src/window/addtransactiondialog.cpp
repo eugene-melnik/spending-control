@@ -33,9 +33,7 @@ void AddTransactionDialog::showEvent( QShowEvent* event )
 {
     this->transactionId = 0;
 
-    this->clearPageValues( TransactionsModel::Outgoing );
-    this->clearPageValues( TransactionsModel::Incoming );
-    this->clearPageValues( TransactionsModel::Internal );
+    this->clearAllValues();
 
     this->bTypeOutgoing->setChecked( true );
     this->swContent->setCurrentIndex( TransactionsModel::Outgoing );

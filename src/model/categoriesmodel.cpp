@@ -172,18 +172,6 @@ int CategoriesModel::columnCount( const QModelIndex& parent ) const
 }
 
 
-void CategoriesModel::addFilter( CategoryTreeItem::Column column, const QVariant& value )
-{
-    this->filters.insertMulti( column, value );
-}
-
-
-void CategoriesModel::resetFilters()
-{
-    this->filters.clear();
-}
-
-
 void CategoriesModel::loadAllData()
 {
     QVariantList rootItemData = this->getRootCategory();
@@ -240,14 +228,16 @@ QList<QVariantList> CategoriesModel::getSubcategories( int parentCategoryId )
     {
         query.prepare(
             "SELECT name, description, id, parent_category_id, type "
-            "FROM categories WHERE deleted_at IS NULL AND parent_category_id IS NULL"
+            "FROM categories "
+            "WHERE deleted_at IS NULL AND parent_category_id IS NULL"
         );
     }
     else
     {
         query.prepare(
             "SELECT name, description, id, parent_category_id, type "
-            "FROM categories WHERE deleted_at IS NULL AND parent_category_id = ?"
+            "FROM categories "
+            "WHERE deleted_at IS NULL AND parent_category_id = ?"
         );
 
         query.bindValue( 0, parentCategoryId );

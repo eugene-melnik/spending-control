@@ -41,6 +41,7 @@ class MainWindow : public QMainWindow, protected Ui::MainWindow
 
     signals:
         void addTransaction();
+        void editTransaction( int id );
         void manageAccounts();
         void manageCategories();
 

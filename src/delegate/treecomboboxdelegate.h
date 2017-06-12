@@ -51,7 +51,7 @@ class TreeComboBoxDelegate : public QStyledItemDelegate
             this->hiddenColumns = columns;
         }
 
-        QWidget* createEditor( QWidget* parent, const QStyleOptionViewItem& /*option*/, const QModelIndex& /*index*/) const override
+        QWidget* createEditor( QWidget* parent, const QStyleOptionViewItem& /*option*/, const QModelIndex& /*index*/ ) const override
         {
             TreeComboBox* editor = new TreeComboBox( parent );
             editor->setModel( this->model );

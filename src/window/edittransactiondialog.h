@@ -50,8 +50,9 @@ class EditTransactionDialog : public QDialog, protected Ui::EditTransactionDialo
         void setCurrentDate();
         void changeType();
         void clearPageValues( int page );
+        void clearAllValues();
 
-        void createSubitem();
+        void createSubitem( const QVariantList& values = QVariantList() );
         void deleteSubitem();
 
         void recalculateSubitemsAmount( int changedRow, int changedColumn );
@@ -74,7 +75,7 @@ class EditTransactionDialog : public QDialog, protected Ui::EditTransactionDialo
             Amount
         };
 
-        int transactionId = 0;
+        unsigned int transactionId = 0;
 
         TreeComboBoxDelegate* subitemCategoryDelegare = nullptr;
         DoubleSpinboxDelegate* subitemAmountDelegate = nullptr;

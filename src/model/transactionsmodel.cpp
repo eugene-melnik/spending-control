@@ -42,9 +42,9 @@ bool TransactionsModel::addRecord( const UniMap& fieldsData, unsigned int* creat
     DatabaseQuery query( this->database );
 
     query.prepare(
-        "INSERT INTO transactions \
-            (type, amount, balance_after, date, planned, source_account_id, destination_account_id, category_id, notes) \
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);"
+        "INSERT INTO transactions "
+            "(type, amount, balance_after, date, planned, source_account_id, destination_account_id, category_id, notes) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);"
     );
 
     query.bindValue( 0, fieldsData.value( "type" ) );
@@ -85,15 +85,20 @@ bool TransactionsModel::addRecord( const UniMap& fieldsData, unsigned int* creat
 
 bool TransactionsModel::updateRecord( const UniMap& fieldsData )
 {
-    this->beginResetModel();
+    if( fieldsData.value( "id" ).toUInt() == 0 )
+    {
+        AppLogger->warn( "Can't updaterecord with id = 0!" );
+        return( false );
+    }
 
     DatabaseQuery query( this->database );
+    this->beginResetModel();
 
     query.prepare(
-        "UPDATE transactions \
-            SET type = ?, amount = ?, balance_after = ?, date = ?, planned = ?, source_account_id = ?, \
-                destination_account_id = ?, category_id = ?, notes = ? \
-        WHERE id = ?;"
+        "UPDATE transactions "
+            "SET type = ?, amount = ?, balance_after = ?, date = ?, planned = ?, source_account_id = ?, "
+                "destination_account_id = ?, category_id = ?, notes = ? "
+        "WHERE id = ?"
     );
 
     query.bindValue( 0, fieldsData.value( "type" ) );
@@ -114,19 +119,19 @@ bool TransactionsModel::updateRecord( const UniMap& fieldsData )
         AppLogger->error( "TransactionsModel::updateAccountRecord - Can't save transaction: " + query.lastError().text() );
     }
 
+    this->records.clear(); // TODO: optimise this, not necessary to clear all if only one record changed
     this->endResetModel();
-    this->records.clear();
 
     return( ok );
 }
 
 
-bool TransactionsModel::deleteRecord( int transactionId )
+bool TransactionsModel::deleteRecord( unsigned int transactionId )
 {
     this->beginResetModel();
 
     DatabaseQuery query( this->database );
-    query.prepare( "DELETE FROM transactions WHERE id = ?;" );
+    query.prepare( "DELETE FROM transactions WHERE id = ?" );
     query.bindValue( 0, transactionId );
 
     bool ok = query.exec();
@@ -143,10 +148,49 @@ bool TransactionsModel::deleteRecord( int transactionId )
 }
 
 
+UniMap TransactionsModel::getRecordForEdit( unsigned int transactionId ) const
+{
+    DatabaseQuery query( this->database );
+
+    query.prepare(
+        "SELECT type, amount, balance_after, date, planned, source_account_id, destination_account_id, category_id, notes "
+        "FROM transactions "
+        "WHERE id = ?"
+    );
+
+    query.bindValue( 0, transactionId );
+
+    if( !query.exec() )
+    {
+        AppLogger->error( "TransactionsModel::getRecordForEdit - Can't load transaction: " + query.lastError().text() );
+    }
+
+    if( query.first() )
+    {
+        return( UniMap({
+            { "id",                 transactionId },
+            { "type",               query.value( 0 ) },
+            { "amount",             query.value( 1 ) },
+            { "balance_after",      query.value( 2 ) },
+            { "date",               query.value( 3 ) },
+            { "planned",            query.value( 4 ) },
+            { "source_account_id",  query.value( 5 ) },
+            { "destination_account_id", query.value( 6 ) },
+            { "category_id",        query.value( 7 ) },
+            { "notes",              query.value( 8 ) }
+        }) );
+    }
+    else
+    {
+        return( UniMap() );
+    }
+}
+
+
 int TransactionsModel::rowCount( const QModelIndex& ) const
 {
     QSqlQuery query = this->database.exec(
-        "SELECT COUNT(*) AS transactions_count FROM transactions;"
+        "SELECT COUNT(*) AS transactions_count FROM transactions"
     );
 
     if( query.first() )
@@ -197,9 +241,9 @@ QVariantList TransactionsModel::getRecord( int row ) const
         QSqlQuery query( this->database );
 
         query.prepare(
-            "SELECT id, type, amount, balance_after, date, planned, source_account_id, \
-                    destination_account_id, category_id, notes  \
-            FROM transactions ORDER BY date ASC LIMIT ? OFFSET ?;"
+            "SELECT id, type, amount, balance_after, date, planned, source_account_id, "
+                    "destination_account_id, category_id, notes  "
+            "FROM transactions ORDER BY date ASC LIMIT ? OFFSET ?"
         );
 
         query.bindValue( 0, 1 );

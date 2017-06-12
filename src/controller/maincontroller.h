@@ -46,6 +46,7 @@ class MainController : public QObject
 
     protected slots:
         void showAddTransaction();
+        void showEditTransaction( unsigned int id );
         void addTransaction( const UniMap& fieldsData );
 
         void showManageAccounts();
@@ -78,6 +79,8 @@ class MainController : public QObject
         void showTotalBalance();
         void showLastTransactions();
 
+        void prepareTransactionsEditor( EditTransactionDialog* dialog );
+
         void recalculateAccountBalance( const QDateTime& fromDate, int accountId );
 
         /**
@@ -86,6 +89,7 @@ class MainController : public QObject
         MainWindow* mainWindow = nullptr;
 
         AddTransactionDialog* addTransactionDialog = nullptr;
+        EditTransactionDialog* editTransactionDialog = nullptr;
 
         AccountsListDialog* accountsListDialog = nullptr;
         AddAccountDialog* addAccountDialog = nullptr;
